@@ -889,7 +889,7 @@ namespace stripMap_Editor.Forms
 
         private void listViewResult2_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
-            e.DrawDefault = true;
+            DrawSubItemDefault(e, sender as ListView);
         }
 
         // MapArray 변경 탭 - ListView Draw 이벤트
@@ -917,7 +917,7 @@ namespace stripMap_Editor.Forms
 
         private void listViewResultMapArray_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
-            e.DrawDefault = true;
+            DrawSubItemDefault(e, sender as ListView);
         }
 
         private void listViewResultMapArrayBinCode_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
@@ -960,7 +960,7 @@ namespace stripMap_Editor.Forms
 
         private void listViewResultMapArrayBinCode_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
-            e.DrawDefault = true;
+            DrawSubItemDefault(e, sender as ListView);
         }
 
         // PCB 2D ID 원복 탭 - ListView Draw 이벤트
@@ -988,7 +988,7 @@ namespace stripMap_Editor.Forms
 
         private void listViewResult_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
-            e.DrawDefault = true;
+            DrawSubItemDefault(e, sender as ListView);
         }
 
         #endregion

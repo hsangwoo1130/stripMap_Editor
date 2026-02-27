@@ -31,6 +31,10 @@ namespace stripMap_Editor.Forms
         private string currentUserId = string.Empty;
         private HashSet<string> _userPermissions = new HashSet<string>();
         private HashSet<string> _userMenus       = new HashSet<string>();
+
+        // 셀 단위 하이라이트 관련
+        private (ListView lv, int row, int col) _hlCell = (null, -1, -1);
+        private int _mouseDownColIndex = -1;
         public MainForm()
         {
             InitializeComponent();
@@ -187,14 +191,18 @@ namespace stripMap_Editor.Forms
             textBox_PCB.KeyDown += SearchTextBox_PCB_KeyDown;
             textBox_MGZ.KeyDown += SearchTextBox_PCB_KeyDown;
 
-            // ── ListView 복사 (Ctrl+C / 드래그) ──────────────────
+            // ── ListView 복사 (Ctrl+C) / 셀 단위 드래그 ──────────────────
             listViewResult_LotId.KeyDown                  += ListView_CopyKeyDown;
+            listViewResult_LotId.MouseDown                += ListView_MouseDown;
             listViewResult_LotId.ItemDrag                 += ListView_ItemDrag;
             listViewResult_MapArray.KeyDown               += ListView_CopyKeyDown;
+            listViewResult_MapArray.MouseDown             += ListView_MouseDown;
             listViewResult_MapArray.ItemDrag              += ListView_ItemDrag;
             listViewResult_MapArray_BinCode.KeyDown       += ListView_CopyKeyDown;
+            listViewResult_MapArray_BinCode.MouseDown     += ListView_MouseDown;
             listViewResult_MapArray_BinCode.ItemDrag      += ListView_ItemDrag;
             listViewResult_PCB.KeyDown                    += ListView_CopyKeyDown;
+            listViewResult_PCB.MouseDown                  += ListView_MouseDown;
             listViewResult_PCB.ItemDrag                   += ListView_ItemDrag;
         }
 
@@ -1760,63 +1768,98 @@ namespace stripMap_Editor.Forms
 
         #endregion
 
-        #region ListView 복사 (Ctrl+C / 드래그)
+        #region ListView 셀 선택 / Ctrl+C 복사
 
         /// <summary>
-        /// Ctrl+C 로 선택 행 복사
+        /// 하이라이트 셀 상태 갱신 및 재그리기 요청
         /// </summary>
-        private void ListView_CopyKeyDown(object sender, KeyEventArgs e)
+        private void SetHighlight(ListView lv, int row, int col)
         {
-            if (e.Control && e.KeyCode == Keys.C)
-                CopyListViewSelection(sender as ListView);
+            var prev = _hlCell.lv;
+            _hlCell = (lv, row, col);
+            prev?.Invalidate();
+            lv?.Invalidate();
         }
 
         /// <summary>
-        /// 드래그 시작 시 선택 행을 클립보드에 복사
+        /// 마우스 클릭 시 HitTest로 클릭한 셀을 특정하고 하이라이트 설정
         /// </summary>
-        private void ListView_ItemDrag(object sender, ItemDragEventArgs e)
+        private void ListView_MouseDown(object sender, MouseEventArgs e)
         {
+            if (e.Button != MouseButtons.Left) return;
+
             var lv = sender as ListView;
-            CopyListViewSelection(lv);
-            if (lv != null && lv.SelectedItems.Count > 0)
+            if (lv == null) return;
+
+            var hit = lv.HitTest(e.Location);
+            if (hit?.Item != null && hit.SubItem != null)
             {
-                var sb = new StringBuilder();
-                foreach (ListViewItem item in lv.SelectedItems)
-                    sb.AppendLine(GetListViewItemText(item));
-                DoDragDrop(sb.ToString().TrimEnd(), DragDropEffects.Copy);
+                _mouseDownColIndex = hit.Item.SubItems.IndexOf(hit.SubItem);
+                SetHighlight(lv, hit.Item.Index, _mouseDownColIndex);
+            }
+            else
+            {
+                _mouseDownColIndex = -1;
             }
         }
 
         /// <summary>
-        /// 선택된 행을 탭 구분 텍스트로 클립보드에 복사
+        /// 드래그 시작 시 MouseDown에서 기록한 컬럼의 셀 하이라이트 설정 (복사 없음)
         /// </summary>
-        private void CopyListViewSelection(ListView lv)
+        private void ListView_ItemDrag(object sender, ItemDragEventArgs e)
         {
-            if (lv == null || lv.SelectedItems.Count == 0) return;
+            if (_mouseDownColIndex < 0) return;
 
-            var sb = new StringBuilder();
-            foreach (ListViewItem item in lv.SelectedItems)
-                sb.AppendLine(GetListViewItemText(item));
+            var lv = sender as ListView;
+            var item = e.Item as ListViewItem;
+            if (lv == null || item == null) return;
 
-            string text = sb.ToString().TrimEnd();
+            if (_mouseDownColIndex < item.SubItems.Count)
+                SetHighlight(lv, item.Index, _mouseDownColIndex);
+        }
+
+        /// <summary>
+        /// Ctrl+C: 하이라이트된 셀 값만 클립보드에 복사
+        /// </summary>
+        private void ListView_CopyKeyDown(object sender, KeyEventArgs e)
+        {
+            if (!e.Control || e.KeyCode != Keys.C) return;
+
+            var (lv, row, col) = _hlCell;
+            if (lv == null || row < 0 || col < 0 || row >= lv.Items.Count) return;
+
+            var item = lv.Items[row];
+            if (col >= item.SubItems.Count) return;
+
+            string text = item.SubItems[col].Text;
             if (!string.IsNullOrEmpty(text))
                 Clipboard.SetText(text);
         }
 
         /// <summary>
-        /// ListViewItem의 비어있지 않은 셀을 탭으로 구분한 문자열 반환
+        /// DrawSubItem 공통 헬퍼: 기본 셀 그리기 (행 선택 파란 배경 유지)
         /// </summary>
-        private string GetListViewItemText(ListViewItem item)
+        private void DrawSubItemDefault(DrawListViewSubItemEventArgs e, ListView lv)
         {
-            var values = new List<string>();
-            foreach (ListViewItem.ListViewSubItem sub in item.SubItems)
-            {
-                if (!string.IsNullOrWhiteSpace(sub.Text))
-                    values.Add(sub.Text);
-            }
-            return string.Join("\t", values);
+            e.DrawDefault = false;
+
+            bool isSelected = e.Item.Selected;
+
+            Color bgColor = isSelected ? SystemColors.Highlight : e.Item.BackColor;
+            using (SolidBrush bgBrush = new SolidBrush(bgColor))
+                e.Graphics.FillRectangle(bgBrush, e.Bounds);
+
+            Color fgColor = isSelected ? SystemColors.HighlightText : e.Item.ForeColor;
+            TextRenderer.DrawText(
+                e.Graphics,
+                e.SubItem.Text,
+                lv.Font,
+                e.Bounds,
+                fgColor,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis
+            );
         }
-        
+
         #endregion
     }
 }
