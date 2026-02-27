@@ -11,6 +11,12 @@ config.ini
 !*.ini.example
 !packages.config
 # ================================================================
+
+# Claude Code local settings
+.claude/
+
+# Windows artifact
+nul
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
