@@ -124,7 +124,8 @@ namespace stripMap_Editor.Forms
                 bool   isActive   = row["active"] != DBNull.Value && Convert.ToBoolean(row["active"]);
                 string activeText = isActive ? "1" : "0";
 
-                ListViewItem item = new ListViewItem(version);
+                ListViewItem item = new ListViewItem("");  // 체크박스 전용 컬럼
+                item.SubItems.Add(version);
                 item.SubItems.Add(lotNo);
                 item.SubItems.Add(stripNoVal);
                 item.SubItems.Add(mgzRf);

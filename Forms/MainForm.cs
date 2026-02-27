@@ -333,14 +333,17 @@ namespace stripMap_Editor.Forms
 
             foreach (DataRow row in dt.Rows)
             {
-                // LOT ID를 첫 번째 컬럼(인덱스 0)에 표시
+                // 첫 번째 컬럼은 체크박스 전용 (빈 값)
+                ListViewItem item = new ListViewItem("");
+
+                // LOT ID
                 string lotNo = row["lotNo"]?.ToString() ?? "";
-                ListViewItem item = new ListViewItem(lotNo);
+                item.SubItems.Add(lotNo);
 
                 // 수정된 LOT ID (저장 전 임시 표시, 초기값은 빈 값)
                 item.SubItems.Add(""); // 수정된 LOT ID 컬럼
 
-                // PCB 2D ID를 세 번째 컬럼에 표시
+                // PCB 2D ID
                 string stripNo = row["stripNo"]?.ToString() ?? "";
                 item.SubItems.Add(stripNo);
 
@@ -757,9 +760,11 @@ namespace stripMap_Editor.Forms
 
             foreach (DataRow row in dt.Rows)
             {
-                // 상단 ListView: PCB 2D ID + MapArray
+                // 상단 ListView: 체크박스 전용 컬럼 + PCB 2D ID + MapArray
+                ListViewItem itemTop = new ListViewItem("");  // 체크박스 전용 컬럼
+
                 string stripNo = row["stripNo"]?.ToString() ?? "";
-                ListViewItem itemTop = new ListViewItem(stripNo);
+                itemTop.SubItems.Add(stripNo);
 
                 string mapArray = row["mapArray"]?.ToString() ?? "";
                 itemTop.SubItems.Add(mapArray);
@@ -767,8 +772,9 @@ namespace stripMap_Editor.Forms
 
                 listViewResult_MapArray.Items.Add(itemTop);
 
-                // 하단 ListView: 빈 컬럼 + Bin Code
-                ListViewItem itemBottom = new ListViewItem("");  // 첫 번째 컬럼 비움
+                // 하단 ListView: 체크박스 전용 + 빈 정렬 컬럼 + Bin Code
+                ListViewItem itemBottom = new ListViewItem("");  // 체크박스 전용 컬럼
+                itemBottom.SubItems.Add("");  // 빈 정렬 컬럼 (MapArray의 PCB 2D ID 컬럼과 정렬)
 
                 string bincode = row["bincode"]?.ToString() ?? "";
                 itemBottom.SubItems.Add(bincode);
@@ -804,22 +810,22 @@ namespace stripMap_Editor.Forms
                         ListViewItem checkedItem = listViewResult_MapArray.CheckedItems[0];
                         int checkedIndex = checkedItem.Index;
 
-                        // MapArray 표시
-                        if (checkedItem.SubItems.Count > 1)
+                        // MapArray 표시 (SubItems[2]: 체크박스전용[0], PCB 2D ID[1], MapArray[2])
+                        if (checkedItem.SubItems.Count > 2)
                         {
-                            textBoxMapArray.Text = checkedItem.SubItems[1].Text;
+                            textBoxMapArray.Text = checkedItem.SubItems[2].Text;
                         }
                         else
                         {
                             textBoxMapArray.Clear();
                         }
 
-                        // 하단 ListView의 같은 인덱스에서 Bin Code 가져오기
+                        // 하단 ListView의 같은 인덱스에서 Bin Code 가져오기 (SubItems[2]: 체크박스[0], 정렬[1], BinCode[2])
                         if (checkedIndex >= 0 &&
                             checkedIndex < listViewResult_MapArray_BinCode.Items.Count &&
-                            listViewResult_MapArray_BinCode.Items[checkedIndex].SubItems.Count > 1)
+                            listViewResult_MapArray_BinCode.Items[checkedIndex].SubItems.Count > 2)
                         {
-                            textBoxBinCode.Text = listViewResult_MapArray_BinCode.Items[checkedIndex].SubItems[1].Text;
+                            textBoxBinCode.Text = listViewResult_MapArray_BinCode.Items[checkedIndex].SubItems[2].Text;
                         }
                         else
                         {
@@ -1275,9 +1281,12 @@ namespace stripMap_Editor.Forms
 
             foreach (DataRow row in dt.Rows)
             {
+                // 첫 번째 컬럼은 체크박스 전용 (빈 값)
+                ListViewItem item = new ListViewItem("");
+
                 // 버전: INT (tblStripMap.[version]과 동일 역할)
                 string version = row["version"]?.ToString() ?? "";
-                ListViewItem item = new ListViewItem(version);
+                item.SubItems.Add(version);
 
                 string lotNo = row["lotNo"]?.ToString() ?? "";
                 item.SubItems.Add(lotNo);

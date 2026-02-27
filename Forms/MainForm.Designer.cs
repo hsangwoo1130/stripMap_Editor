@@ -28,10 +28,12 @@ namespace stripMap_Editor.Forms
             this.labelResultTitle2 = new System.Windows.Forms.Label();
             this.panelResult_LotId = new System.Windows.Forms.Panel();
             this.listViewResult_LotId = new System.Windows.Forms.ListView();
+            this.columnHeaderLot5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderLot1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderLot2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderLot3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderLot4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeaderLotFill = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panelSearch2 = new System.Windows.Forms.Panel();
             this.btnModify_LotId = new stripMap_Editor.Controls.RoundedButton();
             this.btnSearch_LotId = new System.Windows.Forms.Button();
@@ -53,9 +55,11 @@ namespace stripMap_Editor.Forms
             this.panelResult_MapArray = new System.Windows.Forms.Panel();
             this.panel_MapArray_BorderMask = new System.Windows.Forms.Panel();
             this.listViewResult_MapArray = new System.Windows.Forms.ListView();
+            this.columnHeaderMapArrayCheck = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderMapArray1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderMapArray2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.listViewResult_MapArray_BinCode = new System.Windows.Forms.ListView();
+            this.columnHeaderBinCodeCheck = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderMapArray_BinCode1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderMapArray_BinCode2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panelSearchMapArray = new System.Windows.Forms.Panel();
@@ -69,6 +73,7 @@ namespace stripMap_Editor.Forms
             this.labelResultTitle = new System.Windows.Forms.Label();
             this.panelResult_PCB = new System.Windows.Forms.Panel();
             this.listViewResult_PCB = new System.Windows.Forms.ListView();
+            this.columnHeaderPCBCheck = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderPCB1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderPCB2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderPCB3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -85,7 +90,6 @@ namespace stripMap_Editor.Forms
             this.labelLOTId = new System.Windows.Forms.Label();
             this.btnPurgeRollback_PCB = new stripMap_Editor.Controls.RoundedButton();
             this.btnRestore_PCB = new stripMap_Editor.Controls.RoundedButton();
-            this.columnHeaderLot5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControl_Strip.SuspendLayout();
             this.tabPageLotId.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_LotId_Logo)).BeginInit();
@@ -189,11 +193,12 @@ namespace stripMap_Editor.Forms
             this.listViewResult_LotId.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listViewResult_LotId.CheckBoxes = true;
             this.listViewResult_LotId.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeaderLot5,
             this.columnHeaderLot1,
             this.columnHeaderLot2,
             this.columnHeaderLot3,
             this.columnHeaderLot4,
-            this.columnHeaderLot5});
+            this.columnHeaderLotFill});
             this.listViewResult_LotId.FullRowSelect = true;
             this.listViewResult_LotId.GridLines = true;
             this.listViewResult_LotId.HideSelection = false;
@@ -208,20 +213,25 @@ namespace stripMap_Editor.Forms
             this.listViewResult_LotId.DrawItem += new System.Windows.Forms.DrawListViewItemEventHandler(this.listViewResult2_DrawItem);
             this.listViewResult_LotId.DrawSubItem += new System.Windows.Forms.DrawListViewSubItemEventHandler(this.listViewResult2_DrawSubItem);
             // 
+            // columnHeaderLot5
+            // 
+            this.columnHeaderLot5.Text = "";
+            this.columnHeaderLot5.Width = 20;
+            // 
             // columnHeaderLot1
-            //
+            // 
             this.columnHeaderLot1.Text = "LOT ID";
             this.columnHeaderLot1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.columnHeaderLot1.Width = 200;
-            //
+            // 
             // columnHeaderLot2
-            //
+            // 
             this.columnHeaderLot2.Text = "수정 LOT ID";
             this.columnHeaderLot2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.columnHeaderLot2.Width = 200;
-            //
+            // 
             // columnHeaderLot3
-            //
+            // 
             this.columnHeaderLot3.Text = "PCB 2D ID";
             this.columnHeaderLot3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.columnHeaderLot3.Width = 175;
@@ -231,6 +241,11 @@ namespace stripMap_Editor.Forms
             this.columnHeaderLot4.Text = "MGZ ID";
             this.columnHeaderLot4.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.columnHeaderLot4.Width = 200;
+            // 
+            // columnHeaderLotFill
+            // 
+            this.columnHeaderLotFill.Text = "";
+            this.columnHeaderLotFill.Width = 228;
             // 
             // panelSearch2
             // 
@@ -367,7 +382,7 @@ namespace stripMap_Editor.Forms
             this.panel2_MapArray_BorderMask.BackColor = System.Drawing.Color.White;
             this.panel2_MapArray_BorderMask.Location = new System.Drawing.Point(25, 288);
             this.panel2_MapArray_BorderMask.Name = "panel2_MapArray_BorderMask";
-            this.panel2_MapArray_BorderMask.Size = new System.Drawing.Size(201, 2);
+            this.panel2_MapArray_BorderMask.Size = new System.Drawing.Size(221, 2);
             this.panel2_MapArray_BorderMask.TabIndex = 8;
             // 
             // labelResultTitleMapArray
@@ -444,9 +459,9 @@ namespace stripMap_Editor.Forms
             // panel_MapArray_BorderMask
             // 
             this.panel_MapArray_BorderMask.BackColor = System.Drawing.Color.CornflowerBlue;
-            this.panel_MapArray_BorderMask.Location = new System.Drawing.Point(203, 49);
+            this.panel_MapArray_BorderMask.Location = new System.Drawing.Point(213, 49);
             this.panel_MapArray_BorderMask.Name = "panel_MapArray_BorderMask";
-            this.panel_MapArray_BorderMask.Size = new System.Drawing.Size(824, 2);
+            this.panel_MapArray_BorderMask.Size = new System.Drawing.Size(814, 2);
             this.panel_MapArray_BorderMask.TabIndex = 8;
             // 
             // listViewResult_MapArray
@@ -455,6 +470,7 @@ namespace stripMap_Editor.Forms
             this.listViewResult_MapArray.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listViewResult_MapArray.CheckBoxes = true;
             this.listViewResult_MapArray.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeaderMapArrayCheck,
             this.columnHeaderMapArray1,
             this.columnHeaderMapArray2});
             this.listViewResult_MapArray.FullRowSelect = true;
@@ -473,6 +489,11 @@ namespace stripMap_Editor.Forms
             this.listViewResult_MapArray.DrawItem += new System.Windows.Forms.DrawListViewItemEventHandler(this.listViewResultMapArray_DrawItem);
             this.listViewResult_MapArray.DrawSubItem += new System.Windows.Forms.DrawListViewSubItemEventHandler(this.listViewResultMapArray_DrawSubItem);
             // 
+            // columnHeaderMapArrayCheck
+            // 
+            this.columnHeaderMapArrayCheck.Text = "";
+            this.columnHeaderMapArrayCheck.Width = 20;
+            // 
             // columnHeaderMapArray1
             // 
             this.columnHeaderMapArray1.Text = "PCB 2D ID";
@@ -483,13 +504,14 @@ namespace stripMap_Editor.Forms
             // 
             this.columnHeaderMapArray2.Text = "MapArray";
             this.columnHeaderMapArray2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderMapArray2.Width = 825;
+            this.columnHeaderMapArray2.Width = 805;
             // 
             // listViewResult_MapArray_BinCode
             // 
             this.listViewResult_MapArray_BinCode.BackColor = System.Drawing.Color.White;
             this.listViewResult_MapArray_BinCode.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listViewResult_MapArray_BinCode.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeaderBinCodeCheck,
             this.columnHeaderMapArray_BinCode1,
             this.columnHeaderMapArray_BinCode2});
             this.listViewResult_MapArray_BinCode.FullRowSelect = true;
@@ -508,6 +530,11 @@ namespace stripMap_Editor.Forms
             this.listViewResult_MapArray_BinCode.DrawItem += new System.Windows.Forms.DrawListViewItemEventHandler(this.listViewResultMapArrayBinCode_DrawItem);
             this.listViewResult_MapArray_BinCode.DrawSubItem += new System.Windows.Forms.DrawListViewSubItemEventHandler(this.listViewResultMapArrayBinCode_DrawSubItem);
             // 
+            // columnHeaderBinCodeCheck
+            // 
+            this.columnHeaderBinCodeCheck.Text = "";
+            this.columnHeaderBinCodeCheck.Width = 20;
+            // 
             // columnHeaderMapArray_BinCode1
             // 
             this.columnHeaderMapArray_BinCode1.Text = "";
@@ -518,7 +545,7 @@ namespace stripMap_Editor.Forms
             // 
             this.columnHeaderMapArray_BinCode2.Text = "Bin Code";
             this.columnHeaderMapArray_BinCode2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderMapArray_BinCode2.Width = 825;
+            this.columnHeaderMapArray_BinCode2.Width = 805;
             // 
             // panelSearchMapArray
             // 
@@ -652,6 +679,7 @@ namespace stripMap_Editor.Forms
             this.listViewResult_PCB.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listViewResult_PCB.CheckBoxes = true;
             this.listViewResult_PCB.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeaderPCBCheck,
             this.columnHeaderPCB1,
             this.columnHeaderPCB2,
             this.columnHeaderPCB3,
@@ -672,19 +700,25 @@ namespace stripMap_Editor.Forms
             this.listViewResult_PCB.DrawItem += new System.Windows.Forms.DrawListViewItemEventHandler(this.listViewResult_DrawItem);
             this.listViewResult_PCB.DrawSubItem += new System.Windows.Forms.DrawListViewSubItemEventHandler(this.listViewResult_DrawSubItem);
             // 
+            // columnHeaderPCBCheck
+            // 
+            this.columnHeaderPCBCheck.Text = "";
+            this.columnHeaderPCBCheck.Width = 20;
+            // 
             // columnHeaderPCB1
             // 
             this.columnHeaderPCB1.Text = "버전";
             this.columnHeaderPCB1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.columnHeaderPCB1.Width = 38;
             // 
             // columnHeaderPCB2
-            //
+            // 
             this.columnHeaderPCB2.Text = "LOT ID";
             this.columnHeaderPCB2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderPCB2.Width = 100;
-            //
+            this.columnHeaderPCB2.Width = 115;
+            // 
             // columnHeaderPCB3
-            //
+            // 
             this.columnHeaderPCB3.Text = "PCB 2D ID";
             this.columnHeaderPCB3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.columnHeaderPCB3.Width = 160;
@@ -693,7 +727,7 @@ namespace stripMap_Editor.Forms
             // 
             this.columnHeaderPCB6.Text = "MGZ ID";
             this.columnHeaderPCB6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderPCB6.Width = 100;
+            this.columnHeaderPCB6.Width = 85;
             // 
             // columnHeaderPCB4
             // 
@@ -705,7 +739,7 @@ namespace stripMap_Editor.Forms
             // 
             this.columnHeaderPCB5.Text = "생성 시각";
             this.columnHeaderPCB5.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderPCB5.Width = 235;
+            this.columnHeaderPCB5.Width = 230;
             // 
             // panelSearch
             // 
@@ -822,11 +856,6 @@ namespace stripMap_Editor.Forms
             this.btnRestore_PCB.Text = "  원복 ↩️";
             this.btnRestore_PCB.UseVisualStyleBackColor = false;
             // 
-            // columnHeaderLot5
-            // 
-            this.columnHeaderLot5.Text = "";
-            this.columnHeaderLot5.Width = 250;
-            // 
             // MainForm
             // 
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
@@ -925,8 +954,8 @@ namespace stripMap_Editor.Forms
             Color backColor;
             Color textColor = Color.White;
 
-            // 첫 번째 컬럼만 흰색
-            if (e.ColumnIndex == 0)
+            // 첫 번째·두 번째 컬럼(체크박스 전용 + 정렬 컬럼)은 흰색
+            if (e.ColumnIndex <= 1)
             {
                 backColor = Color.White;
                 //textColor = Color.Black;
@@ -1020,8 +1049,10 @@ namespace stripMap_Editor.Forms
         private System.Windows.Forms.ListView listViewResult_MapArray;
         private System.Windows.Forms.ListView listViewResult_MapArray_BinCode;
         private System.Windows.Forms.Label labelResultTitleMapArray;
+        private System.Windows.Forms.ColumnHeader columnHeaderMapArrayCheck;
         private System.Windows.Forms.ColumnHeader columnHeaderMapArray1;
         private System.Windows.Forms.ColumnHeader columnHeaderMapArray2;
+        private System.Windows.Forms.ColumnHeader columnHeaderBinCodeCheck;
         private System.Windows.Forms.ColumnHeader columnHeaderMapArray_BinCode1;
         private System.Windows.Forms.ColumnHeader columnHeaderMapArray_BinCode2;
         private System.Windows.Forms.Label labelMapArrayInput;
@@ -1043,6 +1074,7 @@ namespace stripMap_Editor.Forms
         private System.Windows.Forms.TextBox textBox_PCB;
         private System.Windows.Forms.ListView listViewResult_PCB;
         private System.Windows.Forms.Label labelResultTitle;
+        private System.Windows.Forms.ColumnHeader columnHeaderPCBCheck;
         private System.Windows.Forms.ColumnHeader columnHeaderPCB1;
         private System.Windows.Forms.ColumnHeader columnHeaderPCB2;
         private System.Windows.Forms.ColumnHeader columnHeaderPCB3;
@@ -1065,5 +1097,6 @@ namespace stripMap_Editor.Forms
         private PictureBox pictureBox_MapArray_Logo;
         private PictureBox pictureBox_PCB_Logo;
         private ColumnHeader columnHeaderLot5;
+        private ColumnHeader columnHeaderLotFill;
     }
 }

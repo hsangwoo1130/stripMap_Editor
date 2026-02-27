@@ -28,9 +28,10 @@ namespace stripMap_Editor.Forms
             this.checkBoxAll = new System.Windows.Forms.CheckBox();
             this.panelResult = new System.Windows.Forms.Panel();
             this.listViewPurge = new System.Windows.Forms.ListView();
+            this.colCheck = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colVersion = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colStripNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colLotNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colStripNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colMgzRf = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colActive = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnPurge = new System.Windows.Forms.Button();
@@ -135,6 +136,7 @@ namespace stripMap_Editor.Forms
             this.listViewPurge.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listViewPurge.CheckBoxes = true;
             this.listViewPurge.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.colCheck,
             this.colVersion,
             this.colLotNo,
             this.colStripNo,
@@ -156,35 +158,40 @@ namespace stripMap_Editor.Forms
             this.listViewPurge.DrawSubItem += new System.Windows.Forms.DrawListViewSubItemEventHandler(this.ListViewPurge_DrawSubItem);
             this.listViewPurge.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.ListViewPurge_ItemChecked);
             // 
+            // colCheck
+            // 
+            this.colCheck.Text = "";
+            this.colCheck.Width = 20;
+            // 
             // colVersion
-            //
+            // 
             this.colVersion.Text = "버전";
             this.colVersion.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.colVersion.Width = 70;
-            //
+            // 
             // colLotNo
-            //
+            // 
             this.colLotNo.Text = "LOT ID";
             this.colLotNo.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.colLotNo.Width = 150;
-            //
+            // 
             // colStripNo
-            //
+            // 
             this.colStripNo.Text = "PCB 2D ID";
             this.colStripNo.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.colStripNo.Width = 220;
-            //
+            this.colStripNo.Width = 190;
+            // 
             // colMgzRf
-            //
+            // 
             this.colMgzRf.Text = "MGZ ID";
             this.colMgzRf.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.colMgzRf.Width = 120;
-            //
+            // 
             // colActive
-            //
+            // 
             this.colActive.Text = "Active";
             this.colActive.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.colActive.Width = 116;
+            this.colActive.Width = 126;
             // 
             // btnPurge
             // 
@@ -237,6 +244,7 @@ namespace stripMap_Editor.Forms
         private System.Windows.Forms.CheckBox  checkBoxAll;
         private System.Windows.Forms.Panel     panelResult;
         private System.Windows.Forms.ListView  listViewPurge;
+        private System.Windows.Forms.ColumnHeader colCheck;
         private System.Windows.Forms.ColumnHeader colVersion;
         private System.Windows.Forms.ColumnHeader colStripNo;
         private System.Windows.Forms.ColumnHeader colLotNo;
