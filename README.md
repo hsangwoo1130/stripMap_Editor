@@ -5,9 +5,8 @@ Strip Map 데이터 관리 시스템
 ## 주요 기능
 
 - LOT ID 변경
-- MapArray 수정
-- PCB 2D ID 원복
-- 사용자 권한 관리
+- MapArray 수정/논리 삭제
+- PCB 2D ID 원복/물리 삭제
 
 ## 기술 스택
 
