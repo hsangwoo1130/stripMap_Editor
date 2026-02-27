@@ -31,6 +31,7 @@ namespace stripMap_Editor.Forms
             this.columnHeaderLot1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderLot2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderLot3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeaderLot4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panelSearch2 = new System.Windows.Forms.Panel();
             this.btnModify_LotId = new stripMap_Editor.Controls.RoundedButton();
             this.btnSearch_LotId = new System.Windows.Forms.Button();
@@ -71,6 +72,7 @@ namespace stripMap_Editor.Forms
             this.columnHeaderPCB1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderPCB2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderPCB3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeaderPCB6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderPCB4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderPCB5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panelSearch = new System.Windows.Forms.Panel();
@@ -83,6 +85,7 @@ namespace stripMap_Editor.Forms
             this.labelLOTId = new System.Windows.Forms.Label();
             this.btnPurgeRollback_PCB = new stripMap_Editor.Controls.RoundedButton();
             this.btnRestore_PCB = new stripMap_Editor.Controls.RoundedButton();
+            this.columnHeaderLot5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControl_Strip.SuspendLayout();
             this.tabPageLotId.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_LotId_Logo)).BeginInit();
@@ -188,7 +191,9 @@ namespace stripMap_Editor.Forms
             this.listViewResult_LotId.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeaderLot1,
             this.columnHeaderLot2,
-            this.columnHeaderLot3});
+            this.columnHeaderLot3,
+            this.columnHeaderLot4,
+            this.columnHeaderLot5});
             this.listViewResult_LotId.FullRowSelect = true;
             this.listViewResult_LotId.GridLines = true;
             this.listViewResult_LotId.HideSelection = false;
@@ -207,7 +212,7 @@ namespace stripMap_Editor.Forms
             // 
             this.columnHeaderLot1.Text = "PCB 2D ID";
             this.columnHeaderLot1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderLot1.Width = 300;
+            this.columnHeaderLot1.Width = 175;
             // 
             // columnHeaderLot2
             // 
@@ -217,8 +222,15 @@ namespace stripMap_Editor.Forms
             // 
             // columnHeaderLot3
             // 
-            this.columnHeaderLot3.Text = "";
-            this.columnHeaderLot3.Width = 525;
+            this.columnHeaderLot3.Text = "수정 LOT ID";
+            this.columnHeaderLot3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.columnHeaderLot3.Width = 200;
+            // 
+            // columnHeaderLot4
+            // 
+            this.columnHeaderLot4.Text = "MGZ ID";
+            this.columnHeaderLot4.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.columnHeaderLot4.Width = 200;
             // 
             // panelSearch2
             // 
@@ -643,6 +655,7 @@ namespace stripMap_Editor.Forms
             this.columnHeaderPCB1,
             this.columnHeaderPCB2,
             this.columnHeaderPCB3,
+            this.columnHeaderPCB6,
             this.columnHeaderPCB4,
             this.columnHeaderPCB5});
             this.listViewResult_PCB.FullRowSelect = true;
@@ -668,13 +681,19 @@ namespace stripMap_Editor.Forms
             // 
             this.columnHeaderPCB2.Text = "PCB 2D ID";
             this.columnHeaderPCB2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderPCB2.Width = 180;
+            this.columnHeaderPCB2.Width = 160;
             // 
             // columnHeaderPCB3
             // 
             this.columnHeaderPCB3.Text = "LOT ID";
             this.columnHeaderPCB3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderPCB3.Width = 130;
+            this.columnHeaderPCB3.Width = 100;
+            // 
+            // columnHeaderPCB6
+            // 
+            this.columnHeaderPCB6.Text = "MGZ ID";
+            this.columnHeaderPCB6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.columnHeaderPCB6.Width = 100;
             // 
             // columnHeaderPCB4
             // 
@@ -686,7 +705,7 @@ namespace stripMap_Editor.Forms
             // 
             this.columnHeaderPCB5.Text = "생성 시각";
             this.columnHeaderPCB5.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderPCB5.Width = 295;
+            this.columnHeaderPCB5.Width = 235;
             // 
             // panelSearch
             // 
@@ -802,6 +821,11 @@ namespace stripMap_Editor.Forms
             this.btnRestore_PCB.TabIndex = 2;
             this.btnRestore_PCB.Text = "  원복 ↩️";
             this.btnRestore_PCB.UseVisualStyleBackColor = false;
+            // 
+            // columnHeaderLot5
+            // 
+            this.columnHeaderLot5.Text = "";
+            this.columnHeaderLot5.Width = 250;
             // 
             // MainForm
             // 
@@ -983,6 +1007,7 @@ namespace stripMap_Editor.Forms
         private System.Windows.Forms.Label labelResultTitle2;
         private System.Windows.Forms.ColumnHeader columnHeaderLot1;  // PCB 2D ID
         private System.Windows.Forms.ColumnHeader columnHeaderLot2;  // LOT ID
+        private System.Windows.Forms.ColumnHeader columnHeaderLot4;  // MGZ ID
         private Controls.RoundedButton btnUpdate_LotId;
 
         // MapArray 변경 탭 컨트롤들
@@ -1023,6 +1048,7 @@ namespace stripMap_Editor.Forms
         private System.Windows.Forms.ColumnHeader columnHeaderPCB3;
         private System.Windows.Forms.ColumnHeader columnHeaderPCB4;
         private System.Windows.Forms.ColumnHeader columnHeaderPCB5;
+        private System.Windows.Forms.ColumnHeader columnHeaderPCB6;  // MGZ ID
         private Controls.RoundedButton btnRestore_PCB;
         private Controls.RoundedButton btnPurgeRollback_PCB;
 
@@ -1038,5 +1064,6 @@ namespace stripMap_Editor.Forms
         private PictureBox pictureBox_LotId_Logo;
         private PictureBox pictureBox_MapArray_Logo;
         private PictureBox pictureBox_PCB_Logo;
+        private ColumnHeader columnHeaderLot5;
     }
 }

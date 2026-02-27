@@ -333,8 +333,12 @@ namespace stripMap_Editor.Forms
                 string lotNo = row["lotNo"]?.ToString() ?? "";
                 item.SubItems.Add(lotNo);
 
-                // 필요한 경우 추가 컬럼
-                item.SubItems.Add(""); // 빈 컬럼 (필요시)
+                // 수정된 LOT ID (저장 전 임시 표시, 초기값은 빈 값)
+                item.SubItems.Add(""); // 수정된 LOT ID 컬럼
+
+                // MGZ ID
+                string mgzRf = row["mgzRf"]?.ToString() ?? "";
+                item.SubItems.Add(mgzRf);
 
                 item.Tag = row;
                 listViewResult_LotId.Items.Add(item);
@@ -1203,6 +1207,7 @@ namespace stripMap_Editor.Forms
                     stripNo,
                     process,
                     lotNo,
+                    mgzRf,
                     comment,
                     actionType,
                     workerId,
@@ -1271,6 +1276,9 @@ namespace stripMap_Editor.Forms
 
                 string lotNo = row["lotNo"]?.ToString() ?? "";
                 item.SubItems.Add(lotNo);
+
+                string mgzRf = row["mgzRf"]?.ToString() ?? "";
+                item.SubItems.Add(mgzRf);
 
                 string comment = row["comment"]?.ToString() ?? "";
                 item.SubItems.Add(comment);
