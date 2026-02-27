@@ -31,6 +31,7 @@ namespace stripMap_Editor.Forms
             this.colVersion = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colStripNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colLotNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colMgzRf = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colActive = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnPurge = new System.Windows.Forms.Button();
             this.panelSearch.SuspendLayout();
@@ -135,8 +136,9 @@ namespace stripMap_Editor.Forms
             this.listViewPurge.CheckBoxes = true;
             this.listViewPurge.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colVersion,
-            this.colStripNo,
             this.colLotNo,
+            this.colStripNo,
+            this.colMgzRf,
             this.colActive});
             this.listViewPurge.FullRowSelect = true;
             this.listViewPurge.GridLines = true;
@@ -155,25 +157,31 @@ namespace stripMap_Editor.Forms
             this.listViewPurge.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.ListViewPurge_ItemChecked);
             // 
             // colVersion
-            // 
+            //
             this.colVersion.Text = "버전";
             this.colVersion.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.colVersion.Width = 70;
-            // 
-            // colStripNo
-            // 
-            this.colStripNo.Text = "PCB 2D ID";
-            this.colStripNo.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.colStripNo.Width = 290;
-            // 
+            //
             // colLotNo
-            // 
+            //
             this.colLotNo.Text = "LOT ID";
             this.colLotNo.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.colLotNo.Width = 200;
-            // 
+            this.colLotNo.Width = 150;
+            //
+            // colStripNo
+            //
+            this.colStripNo.Text = "PCB 2D ID";
+            this.colStripNo.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.colStripNo.Width = 220;
+            //
+            // colMgzRf
+            //
+            this.colMgzRf.Text = "MGZ ID";
+            this.colMgzRf.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.colMgzRf.Width = 120;
+            //
             // colActive
-            // 
+            //
             this.colActive.Text = "Active";
             this.colActive.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.colActive.Width = 116;
@@ -232,6 +240,7 @@ namespace stripMap_Editor.Forms
         private System.Windows.Forms.ColumnHeader colVersion;
         private System.Windows.Forms.ColumnHeader colStripNo;
         private System.Windows.Forms.ColumnHeader colLotNo;
+        private System.Windows.Forms.ColumnHeader colMgzRf;
         private System.Windows.Forms.ColumnHeader colActive;
         private System.Windows.Forms.Button    btnPurge;
     }

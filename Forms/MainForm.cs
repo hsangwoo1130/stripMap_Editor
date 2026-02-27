@@ -333,16 +333,16 @@ namespace stripMap_Editor.Forms
 
             foreach (DataRow row in dt.Rows)
             {
-                // PCB 2D ID를 첫 번째 컬럼(인덱스 0)에 표시
-                string stripNo = row["stripNo"]?.ToString() ?? "";
-                ListViewItem item = new ListViewItem(stripNo);  // ← 빈 값이 아닌 실제 데이터
-
-                // LOT ID를 두 번째 컬럼에 표시
+                // LOT ID를 첫 번째 컬럼(인덱스 0)에 표시
                 string lotNo = row["lotNo"]?.ToString() ?? "";
-                item.SubItems.Add(lotNo);
+                ListViewItem item = new ListViewItem(lotNo);
 
                 // 수정된 LOT ID (저장 전 임시 표시, 초기값은 빈 값)
                 item.SubItems.Add(""); // 수정된 LOT ID 컬럼
+
+                // PCB 2D ID를 세 번째 컬럼에 표시
+                string stripNo = row["stripNo"]?.ToString() ?? "";
+                item.SubItems.Add(stripNo);
 
                 // MGZ ID
                 string mgzRf = row["mgzRf"]?.ToString() ?? "";
@@ -1279,11 +1279,11 @@ namespace stripMap_Editor.Forms
                 string version = row["version"]?.ToString() ?? "";
                 ListViewItem item = new ListViewItem(version);
 
-                string stripNo = row["stripNo"]?.ToString() ?? "";
-                item.SubItems.Add(stripNo);
-
                 string lotNo = row["lotNo"]?.ToString() ?? "";
                 item.SubItems.Add(lotNo);
+
+                string stripNo = row["stripNo"]?.ToString() ?? "";
+                item.SubItems.Add(stripNo);
 
                 string mgzRf = row["mgzRf"]?.ToString() ?? "";
                 item.SubItems.Add(mgzRf);

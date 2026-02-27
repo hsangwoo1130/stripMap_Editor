@@ -71,7 +71,8 @@ namespace stripMap_Editor.Forms
                         m.[version],
                         m.stripNo,
                         m.process,
-                        ISNULL(m.lotNo, '') AS lotNo,
+                        ISNULL(m.lotNo,  '') AS lotNo,
+                        ISNULL(m.mgzRf,  '') AS mgzRf,
                         m.active
                     FROM dbo.tblStripMap m
                     WHERE m.stripNo LIKE @stripNo
@@ -117,14 +118,16 @@ namespace stripMap_Editor.Forms
             foreach (DataRow row in dt.Rows)
             {
                 string version    = row["version"]?.ToString() ?? "";
-                string stripNoVal = row["stripNo"]?.ToString() ?? "";
                 string lotNo      = row["lotNo"]?.ToString()   ?? "";
+                string stripNoVal = row["stripNo"]?.ToString() ?? "";
+                string mgzRf      = row["mgzRf"]?.ToString()   ?? "";
                 bool   isActive   = row["active"] != DBNull.Value && Convert.ToBoolean(row["active"]);
                 string activeText = isActive ? "1" : "0";
 
                 ListViewItem item = new ListViewItem(version);
-                item.SubItems.Add(stripNoVal);
                 item.SubItems.Add(lotNo);
+                item.SubItems.Add(stripNoVal);
+                item.SubItems.Add(mgzRf);
                 item.SubItems.Add(activeText);
                 item.Tag = row;
 

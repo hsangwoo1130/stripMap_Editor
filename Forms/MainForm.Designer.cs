@@ -209,22 +209,22 @@ namespace stripMap_Editor.Forms
             this.listViewResult_LotId.DrawSubItem += new System.Windows.Forms.DrawListViewSubItemEventHandler(this.listViewResult2_DrawSubItem);
             // 
             // columnHeaderLot1
-            // 
-            this.columnHeaderLot1.Text = "PCB 2D ID";
+            //
+            this.columnHeaderLot1.Text = "LOT ID";
             this.columnHeaderLot1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderLot1.Width = 175;
-            // 
+            this.columnHeaderLot1.Width = 200;
+            //
             // columnHeaderLot2
-            // 
-            this.columnHeaderLot2.Text = "LOT ID";
+            //
+            this.columnHeaderLot2.Text = "수정 LOT ID";
             this.columnHeaderLot2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.columnHeaderLot2.Width = 200;
-            // 
+            //
             // columnHeaderLot3
-            // 
-            this.columnHeaderLot3.Text = "수정 LOT ID";
+            //
+            this.columnHeaderLot3.Text = "PCB 2D ID";
             this.columnHeaderLot3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderLot3.Width = 200;
+            this.columnHeaderLot3.Width = 175;
             // 
             // columnHeaderLot4
             // 
@@ -678,16 +678,16 @@ namespace stripMap_Editor.Forms
             this.columnHeaderPCB1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // columnHeaderPCB2
-            // 
-            this.columnHeaderPCB2.Text = "PCB 2D ID";
+            //
+            this.columnHeaderPCB2.Text = "LOT ID";
             this.columnHeaderPCB2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderPCB2.Width = 160;
-            // 
+            this.columnHeaderPCB2.Width = 100;
+            //
             // columnHeaderPCB3
-            // 
-            this.columnHeaderPCB3.Text = "LOT ID";
+            //
+            this.columnHeaderPCB3.Text = "PCB 2D ID";
             this.columnHeaderPCB3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderPCB3.Width = 100;
+            this.columnHeaderPCB3.Width = 160;
             // 
             // columnHeaderPCB6
             // 
