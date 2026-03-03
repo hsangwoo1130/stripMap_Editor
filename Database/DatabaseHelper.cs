@@ -40,10 +40,10 @@ namespace StripMapEditor.Database
         /// </summary>
         private static void CreateDefaultIniFile()
         {
-            _iniFile.Write("Database", "Server",   "192.168.10.79");
-            _iniFile.Write("Database", "Database", "SFA_TEST_DB");
-            _iniFile.Write("Database", "UserId",   "sfa_test_login");
-            _iniFile.Write("Database", "Password", "sfa_test_login");
+            _iniFile.Write("Database", "Server",   "");
+            _iniFile.Write("Database", "Database", "");
+            _iniFile.Write("Database", "UserId",   "");
+            _iniFile.Write("Database", "Password", "");
             _iniFile.Write("Database", "Timeout",  "5");
             _iniFile.Write("Database", "Encrypt",  "false");
         }
@@ -55,10 +55,10 @@ namespace StripMapEditor.Database
         {
             try
             {
-                string server   = _iniFile.Read("Database", "Server",   "192.168.10.79");
-                string database = _iniFile.Read("Database", "Database", "SFA_TEST_DB");
-                string userId   = _iniFile.Read("Database", "UserId",   "sfa_test_login");
-                string password = _iniFile.Read("Database", "Password", "sfa_test_login");
+                string server   = _iniFile.Read("Database", "Server",   "");
+                string database = _iniFile.Read("Database", "Database", "");
+                string userId   = _iniFile.Read("Database", "UserId",   "");
+                string password = _iniFile.Read("Database", "Password", "");
                 string timeout  = _iniFile.Read("Database", "Timeout",  "5");
                 string encrypt  = _iniFile.Read("Database", "Encrypt",  "false");
 
