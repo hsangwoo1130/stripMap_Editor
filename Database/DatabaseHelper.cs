@@ -334,7 +334,6 @@ namespace StripMapEditor.Database
 
         /// <summary>
         /// 전체 메뉴 정보 로드 (menuId → menuName, menuUrl)
-        /// 자식 메뉴(parentMenuId IS NOT NULL)만 반환
         /// </summary>
         public static Dictionary<string, (string menuName, string menuUrl)> LoadMenuInfo()
         {
@@ -343,8 +342,7 @@ namespace StripMapEditor.Database
             string sql = @"
                 SELECT menuId, menuName, ISNULL(menuUrl, '') AS menuUrl
                 FROM   dbo.tblMenu
-                WHERE  parentMenuId IS NOT NULL
-                AND    isActive = 1";
+                WHERE  isActive = 1";
 
             DataTable dt = ExecuteQuery(sql);
             foreach (DataRow row in dt.Rows)
