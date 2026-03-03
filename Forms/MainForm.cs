@@ -32,6 +32,8 @@ namespace stripMap_Editor.Forms
         private string currentUserId = string.Empty;
         private HashSet<string> _userPermissions = new HashSet<string>();
         private HashSet<string> _userMenus       = new HashSet<string>();
+        private Dictionary<string, (string menuName, string menuUrl)> _menuInfo = new Dictionary<string, (string, string)>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, TabPage> _menuUrlMap = new Dictionary<string, TabPage>(StringComparer.OrdinalIgnoreCase);
 
         // 셀 단위 하이라이트 관련
         private (ListView lv, int row, int col) _hlCell = (null, -1, -1);
@@ -68,6 +70,7 @@ namespace stripMap_Editor.Forms
             {
                 _userPermissions = DatabaseHelper.LoadRolePermissions(LoggedInUserRole);
                 _userMenus       = DatabaseHelper.LoadRoleMenus(LoggedInUserRole);
+                _menuInfo        = DatabaseHelper.LoadMenuInfo();
             }
             catch (Exception ex)
             {
@@ -76,29 +79,65 @@ namespace stripMap_Editor.Forms
                     "권한 로드 실패", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 _userPermissions = new HashSet<string>();
                 _userMenus       = new HashSet<string>();
+                _menuInfo        = new Dictionary<string, (string, string)>(StringComparer.OrdinalIgnoreCase);
             }
         }
 
         /// <summary>
         /// 사용자 권한에 따른 UI 제어 (DB 메뉴 기반, tblMenu 1:1 매핑)
-        /// STRIP_EDIT → tabPageLotId    (Lot ID 수정)
-        /// MAP_EDIT   → tabPageMapArray (Map Array 수정)
-        /// STRIP_HIST → tabPagePcbRestore (PCB 원복)
+        /// STRIP_EDIT → tabPageLotId      (menuUrl=lotidedit)
+        /// MAP_EDIT   → tabPageMapArray   (menuUrl=mapedit)
+        /// STRIP_HIST → tabPagePcbRestore (menuUrl=striphistory)
+        /// PURGE      → _tabPageAdmin     (menuUrl=purge)
         /// </summary>
         private void ApplyUserPermissions()
         {
             tabPageLotId.Parent      = _userMenus.Contains(MenuIds.STRIP_EDIT) ? tabControl_Strip : null;
             tabPageMapArray.Parent   = _userMenus.Contains(MenuIds.MAP_EDIT)   ? tabControl_Strip : null;
             tabPagePcbRestore.Parent = _userMenus.Contains(MenuIds.STRIP_HIST) ? tabControl_Strip : null;
-            _tabPageAdmin.Parent     = _userMenus.Contains(MenuIds.ADMIN)      ? tabControl_Strip : null;
+            _tabPageAdmin.Parent     = _userMenus.Contains(MenuIds.PURGE)      ? tabControl_Strip : null;
+
+            // tblMenu.menuName으로 탭 텍스트 동적 설정
+            tabPageLotId.Text      = GetMenuName(MenuIds.STRIP_EDIT, tabPageLotId.Text);
+            tabPageMapArray.Text   = GetMenuName(MenuIds.MAP_EDIT,   tabPageMapArray.Text);
+            tabPagePcbRestore.Text = GetMenuName(MenuIds.STRIP_HIST, tabPagePcbRestore.Text);
+            _tabPageAdmin.Text     = GetMenuName(MenuIds.PURGE,      _tabPageAdmin.Text);
+
+            // menuUrl → TabPage 매핑 구성
+            _menuUrlMap.Clear();
+            RegisterMenuUrl(MenuIds.STRIP_EDIT, tabPageLotId);
+            RegisterMenuUrl(MenuIds.MAP_EDIT,   tabPageMapArray);
+            RegisterMenuUrl(MenuIds.STRIP_HIST, tabPagePcbRestore);
+            RegisterMenuUrl(MenuIds.PURGE,      _tabPageAdmin);
 
             if (tabControl_Strip.TabCount > 0)
                 tabControl_Strip.SelectedIndex = 0;
         }
 
+        private string GetMenuName(string menuId, string fallback)
+            => _menuInfo.TryGetValue(menuId, out var info) && !string.IsNullOrEmpty(info.menuName)
+               ? info.menuName : fallback;
+
+        private void RegisterMenuUrl(string menuId, TabPage tab)
+        {
+            if (_menuInfo.TryGetValue(menuId, out var info) && !string.IsNullOrEmpty(info.menuUrl))
+                _menuUrlMap[info.menuUrl] = tab;
+        }
+
         /// <summary>
-        /// 관리자 탭 동적 생성 — 탭 클릭 시 AdminForm 모달 팝업
-        /// tblRoleMenu ADMIN 메뉴 권한이 있는 경우에만 표시 (ApplyUserPermissions에서 제어)
+        /// menuUrl로 탭 이동 (예: NavigateTo("mapedit"))
+        /// </summary>
+        public void NavigateTo(string menuUrl)
+        {
+            if (string.IsNullOrEmpty(menuUrl)) return;
+            if (!_menuUrlMap.TryGetValue(menuUrl, out TabPage target)) return;
+            if (target.Parent == null) return;  // 권한 없어 숨겨진 탭
+            tabControl_Strip.SelectedTab = target;
+        }
+
+        /// <summary>
+        /// Purge 탭 동적 생성 — 탭 클릭 시 AdminForm 모달 팝업
+        /// tblRoleMenu PURGE 메뉴 권한이 있는 경우에만 표시 (ApplyUserPermissions에서 제어)
         /// </summary>
         private void SetupAdminTab()
         {

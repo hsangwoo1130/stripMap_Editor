@@ -25,10 +25,10 @@ namespace stripMap_Editor
     // 메뉴 ID 상수 (tblMenu.menuId 와 1:1 일치)
     public static class MenuIds
     {
-        public const string STRIP_EDIT = "STRIP_EDIT";  // Lot ID 수정 탭
-        public const string MAP_EDIT   = "MAP_EDIT";    // Map Array 수정 탭
-        public const string STRIP_HIST = "STRIP_HIST";  // PCB 원복 탭
-        public const string ADMIN      = "ADMIN";        // 관리자 화면 (미래 사용)
+        public const string STRIP_EDIT = "STRIP_EDIT";  // Lot ID 수정 탭  (menuUrl=lotidedit)
+        public const string MAP_EDIT   = "MAP_EDIT";    // Map Array 수정 탭 (menuUrl=mapedit)
+        public const string STRIP_HIST = "STRIP_HIST";  // PCB 원복 탭      (menuUrl=striphistory)
+        public const string PURGE      = "PURGE";       // 관리자 Purge 탭  (menuUrl=purge)
     }
 
     // ActionType 상수 (dbo.tblActionFunction.functionId 와 1:1 일치)

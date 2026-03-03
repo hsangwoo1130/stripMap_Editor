@@ -333,6 +333,27 @@ namespace StripMapEditor.Database
         }
 
         /// <summary>
+        /// 전체 메뉴 정보 로드 (menuId → menuName, menuUrl)
+        /// 자식 메뉴(parentMenuId IS NOT NULL)만 반환
+        /// </summary>
+        public static Dictionary<string, (string menuName, string menuUrl)> LoadMenuInfo()
+        {
+            var result = new Dictionary<string, (string, string)>(StringComparer.OrdinalIgnoreCase);
+
+            string sql = @"
+                SELECT menuId, menuName, ISNULL(menuUrl, '') AS menuUrl
+                FROM   dbo.tblMenu
+                WHERE  parentMenuId IS NOT NULL
+                AND    isActive = 1";
+
+            DataTable dt = ExecuteQuery(sql);
+            foreach (DataRow row in dt.Rows)
+                result[row["menuId"].ToString()] = (row["menuName"].ToString(), row["menuUrl"].ToString());
+
+            return result;
+        }
+
+        /// <summary>
         /// 역할별 메뉴 권한 로드 (상위 역할 상속 포함, canView=1)
         /// </summary>
         public static HashSet<string> LoadRoleMenus(string roleId)
