@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using StripMapEditor.Database;
+using StripMapEditor.Utils;
 
 namespace stripMap_Editor.Forms
 {
@@ -527,6 +528,7 @@ namespace stripMap_Editor.Forms
                             new SqlParameter("@workerIp",      workerIp)
                         });
 
+                        AppLogger.Info($"[{ActionTypes.LOT_UPDATE}] user={currentUserId} | stripNo={stripNo} | {oldLotId} → {newLotId}");
                         successCount++;
                     }
                     catch (SqlException sqlex)
@@ -541,6 +543,7 @@ namespace stripMap_Editor.Forms
                     }
                 }
 
+                AppLogger.Info($"[{ActionTypes.LOT_UPDATE}_RESULT] user={currentUserId} | 성공={successCount} 실패={failCount}");
                 string resultMessage = $"성공: {successCount}건\n실패: {failCount}건";
                 if (errorLog.Length > 0)
                     resultMessage += $"\n\n오류 내역:\n{errorLog}";
@@ -980,6 +983,7 @@ namespace stripMap_Editor.Forms
                             new SqlParameter("@workerIp",      workerIp)
                         });
 
+                        AppLogger.Info($"[{ActionTypes.STRIP_DELETE}] user={currentUserId} | stripNo={stripNo} | 사유={comment}");
                         successCount++;
                     }
                     catch (SqlException sqlex)
@@ -994,6 +998,7 @@ namespace stripMap_Editor.Forms
                     }
                 }
 
+                AppLogger.Info($"[{ActionTypes.STRIP_DELETE}_RESULT] user={currentUserId} | 성공={successCount} 실패={failCount}");
                 string resultMessage = $"삭제 완료\n\n성공: {successCount}건\n실패: {failCount}건";
                 if (errorLog.Length > 0)
                     resultMessage += $"\n\n오류 내역:\n{errorLog}";
@@ -1150,6 +1155,7 @@ namespace stripMap_Editor.Forms
                             new SqlParameter("@workerIp",      workerIp)
                         });
 
+                        AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}] user={currentUserId} | stripNo={stripNo} | mapArray={newMapArray} binCode={newBinCode}");
                         successCount++;
                     }
                     catch (SqlException sqlex)
@@ -1164,6 +1170,7 @@ namespace stripMap_Editor.Forms
                     }
                 }
 
+                AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}_RESULT] user={currentUserId} | 성공={successCount} 실패={failCount}");
                 string resultMessage = $"수정 완료\n\n성공: {successCount}건\n실패: {failCount}건";
                 if (errorLog.Length > 0)
                     resultMessage += $"\n\n오류 내역:\n{errorLog}";
@@ -1610,6 +1617,7 @@ namespace stripMap_Editor.Forms
                             new SqlParameter("@workerIp",       workerIp)
                         });
 
+                        AppLogger.Info($"[{ActionTypes.STRIP_PURGE_ROLLBACK}] user={currentUserId} | stripNo={stripNo} | timekey={targetTimekey}");
                         successCount++;
                     }
                     catch (SqlException sqlex)
@@ -1624,6 +1632,7 @@ namespace stripMap_Editor.Forms
                     }
                 }
 
+                AppLogger.Info($"[{ActionTypes.STRIP_PURGE_ROLLBACK}_RESULT] user={currentUserId} | 성공={successCount} 실패={failCount}");
                 string resultMessage = $"Purge 복원 완료\n\n성공: {successCount}건\n실패: {failCount}건";
                 if (errorLog.Length > 0)
                     resultMessage += $"\n\n오류 내역:\n{errorLog}";
@@ -1713,6 +1722,7 @@ namespace stripMap_Editor.Forms
                             new SqlParameter("@workerIp",      workerIp)
                         });
 
+                        AppLogger.Info($"[{ActionTypes.STRIP_ROLLBACK}] user={currentUserId} | stripNo={stripNo} | timekey={targetTimekey}");
                         successCount++;
                     }
                     catch (SqlException sqlex)
@@ -1727,6 +1737,7 @@ namespace stripMap_Editor.Forms
                     }
                 }
 
+                AppLogger.Info($"[{ActionTypes.STRIP_ROLLBACK}_RESULT] user={currentUserId} | 성공={successCount} 실패={failCount}");
                 string resultMessage = $"성공: {successCount}건\n실패: {failCount}건";
                 if (errorLog.Length > 0)
                     resultMessage += $"\n\n오류 내역:\n{errorLog}";

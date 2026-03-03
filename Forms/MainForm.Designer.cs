@@ -867,7 +867,7 @@ namespace stripMap_Editor.Forms
             this.MinimizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "7";
+            this.Text = "StripMap Editor";
             this.tabControl_Strip.ResumeLayout(false);
             this.tabPageLotId.ResumeLayout(false);
             this.tabPageLotId.PerformLayout();

@@ -14,6 +14,8 @@ namespace StripMapEditor
         [STAThread]
         static void Main()
         {
+            AppLogger.Initialize();
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
@@ -68,6 +70,8 @@ namespace StripMapEditor
 
                 Application.Run(mainForm);
             }
+
+            AppLogger.Close();
         }
     }
 }

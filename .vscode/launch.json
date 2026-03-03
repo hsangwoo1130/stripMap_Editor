@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "StripMap Editor (Debug)",
+            "type": "clr",
+            "request": "launch",
+            "program": "${workspaceFolder}\\bin\\Debug\\stripMap_Editor.exe",
+            "preLaunchTask": "Build: Debug",
+            "console": "internalConsole"
+        }
+    ]
+}

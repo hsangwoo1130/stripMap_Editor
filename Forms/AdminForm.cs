@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
 using StripMapEditor.Database;
+using StripMapEditor.Utils;
 
 namespace stripMap_Editor.Forms
 {
@@ -248,6 +249,7 @@ namespace stripMap_Editor.Forms
                                 new SqlParameter("@workerIp",      workerIp)
                             });
 
+                        AppLogger.Info($"[{ActionTypes.STRIP_PURGE}] user={_userId} | stripNo={stripNo} ver={version} | 사유={comment}");
                         successCount++;
                     }
                     catch (SqlException sqlex)
@@ -262,6 +264,7 @@ namespace stripMap_Editor.Forms
                     }
                 }
 
+                AppLogger.Info($"[{ActionTypes.STRIP_PURGE}_RESULT] user={_userId} | 성공={successCount} 실패={failCount}");
                 // ③ 결과 표시
                 if (failCount == 0)
                     MessageBox.Show($"{successCount}건 Purge 완료.", "완료",
