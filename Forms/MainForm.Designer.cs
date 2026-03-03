@@ -984,11 +984,19 @@ namespace stripMap_Editor.Forms
 
         private void listViewResultMapArrayBinCode_DrawItem(object sender, DrawListViewItemEventArgs e)
         {
-            e.DrawDefault = true;
+            e.DrawDefault = false;  // DrawSubItem이 각 열을 개별 렌더링
         }
 
         private void listViewResultMapArrayBinCode_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
+            // 왼쪽 빈 칸(col 0,1)은 흰 배경 유지 — Bin Code 열(col 2)만 선택 하이라이트 적용
+            if (e.ColumnIndex <= 1)
+            {
+                e.DrawDefault = false;
+                using (var bg = new SolidBrush(Color.White))
+                    e.Graphics.FillRectangle(bg, e.Bounds);
+                return;
+            }
             DrawSubItemDefault(e, sender as ListView);
         }
 

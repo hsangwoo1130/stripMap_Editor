@@ -38,6 +38,9 @@ namespace stripMap_Editor.Forms
         // 셀 단위 하이라이트 관련
         private (ListView lv, int row, int col) _hlCell = (null, -1, -1);
         private int _mouseDownColIndex = -1;
+
+        // MapArray 상하 ListView 선택 동기화 재진입 방지
+        private bool _syncingSelection = false;
         public MainForm()
         {
             InitializeComponent();
@@ -101,7 +104,7 @@ namespace stripMap_Editor.Forms
             tabPageLotId.Text      = GetMenuName(MenuIds.STRIP_EDIT, tabPageLotId.Text);
             tabPageMapArray.Text   = GetMenuName(MenuIds.MAP_EDIT,   tabPageMapArray.Text);
             tabPagePcbRestore.Text = GetMenuName(MenuIds.STRIP_HIST, tabPagePcbRestore.Text);
-            _tabPageAdmin.Text     = GetMenuName(MenuIds.PURGE,      _tabPageAdmin.Text);
+            _tabPageAdmin.Text     = " " + GetMenuName(MenuIds.PURGE, _tabPageAdmin.Text) + " ";
 
             // menuUrl → TabPage 매핑 구성
             _menuUrlMap.Clear();
@@ -211,6 +214,9 @@ namespace stripMap_Editor.Forms
             btnUpdate_MapArray.Click += BtnUpdateMapArray_Click;
             listViewResult_MapArray.ItemChecked += ListViewResultMapArray_ItemChecked;
             listViewResult_MapArray.ColumnWidthChanging += ListView_ColumnWidthChanging;
+            listViewResult_MapArray_BinCode.MouseDoubleClick += ListViewResultMapArrayBinCode_MouseDoubleClick;
+            listViewResult_MapArray.SelectedIndexChanged          += ListViewResultMapArray_SelectedIndexChanged;
+            listViewResult_MapArray_BinCode.SelectedIndexChanged  += ListViewResultMapArrayBinCode_SelectedIndexChanged;
 
             // PCB 2D ID 원복 탭 이벤트
             btnSearch_PCB.Click += BtnSearch_Click;
@@ -889,6 +895,46 @@ namespace stripMap_Editor.Forms
                 textBoxMapArray.Clear();
                 textBoxBinCode.Clear();
             }
+        }
+
+        private void ListViewResultMapArrayBinCode_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            var hit = listViewResult_MapArray_BinCode.HitTest(e.Location);
+            if (hit?.Item == null) return;
+
+            int index = hit.Item.Index;
+            if (index < 0 || index >= listViewResult_MapArray.Items.Count) return;
+
+            listViewResult_MapArray.Items[index].Checked = !listViewResult_MapArray.Items[index].Checked;
+        }
+
+        private void ListViewResultMapArray_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_syncingSelection) return;
+            _syncingSelection = true;
+            try { SyncListViewSelection(listViewResult_MapArray, listViewResult_MapArray_BinCode); }
+            finally { _syncingSelection = false; }
+        }
+
+        private void ListViewResultMapArrayBinCode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_syncingSelection) return;
+            _syncingSelection = true;
+            try { SyncListViewSelection(listViewResult_MapArray_BinCode, listViewResult_MapArray); }
+            finally { _syncingSelection = false; }
+        }
+
+        private void SyncListViewSelection(ListView source, ListView target)
+        {
+            target.BeginUpdate();
+            foreach (ListViewItem item in target.Items)
+                item.Selected = false;
+            foreach (ListViewItem item in source.SelectedItems)
+            {
+                if (item.Index < target.Items.Count)
+                    target.Items[item.Index].Selected = true;
+            }
+            target.EndUpdate();
         }
 
         /// <summary>
