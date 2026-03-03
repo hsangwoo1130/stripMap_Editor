@@ -45,22 +45,5 @@ namespace StripMapEditor.Utils
             WritePrivateProfileString(section, key, value, _filePath);
         }
 
-        /// <summary>
-        /// INI 파일 존재 여부 확인
-        /// </summary>
-        public bool FileExists()
-        {
-            return File.Exists(_filePath);
-        }
-
-        public void Make_Dir(string filePath)
-        {
-            DirectoryInfo di = new DirectoryInfo(filePath);
-
-            if (di.Exists == false)
-            {
-                di.Create();
-            }
-        }
     }
 }

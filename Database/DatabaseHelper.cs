@@ -25,7 +25,7 @@ namespace StripMapEditor.Database
             _iniFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.ini");
             _iniFile = new IniFileHelper(_iniFilePath);
 
-            if (!_iniFile.FileExists())
+            if (!File.Exists(_iniFilePath))
                 CreateDefaultIniFile();
 
             LoadConnectionString();
@@ -36,7 +36,7 @@ namespace StripMapEditor.Database
         // ─────────────────────────────────────────────
 
         /// <summary>
-        /// 기본 INI 파일 생성 (config.ini 없을 때)
+        /// 기본 INI 파일 생성 (config.ini 없을 때 양식만 제공)
         /// </summary>
         private static void CreateDefaultIniFile()
         {

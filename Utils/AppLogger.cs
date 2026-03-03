@@ -1,6 +1,4 @@
-using System;
 using System.IO;
-using System.Net.Sockets;
 using Serilog;
 
 namespace StripMapEditor.Utils
@@ -41,20 +39,5 @@ namespace StripMapEditor.Utils
         /// </summary>
         public static void Info(string message) => Log.Information(message);
 
-        /// <summary>
-        /// 로컬 IPv4 주소 반환 (로그 메시지에 포함용)
-        /// </summary>
-        public static string GetLocalIp()
-        {
-            try
-            {
-                var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
-                foreach (var ip in host.AddressList)
-                    if (ip.AddressFamily == AddressFamily.InterNetwork)
-                        return ip.ToString();
-                return "127.0.0.1";
-            }
-            catch { return "127.0.0.1"; }
-        }
     }
 }

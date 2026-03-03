@@ -14,11 +14,8 @@ namespace stripMap_Editor
     }
     public static class UserPermissions
     {
-        public const string LOT_UPDATE = "LOT_UPDATE";
-        public const string STRIP_UPDATE = "STRIP_UPDATE";
-        public const string STRIP_DELETE = "STRIP_DELETE";
-        public const string STRIP_ROLLBACK = "STRIP_ROLLBACK";
-        public const string STRIP_PURGE = "STRIP_PURGE";
+        public const string STRIP_DELETE         = "STRIP_DELETE";
+        public const string STRIP_ROLLBACK       = "STRIP_ROLLBACK";
         public const string STRIP_PURGE_ROLLBACK = "STRIP_PURGE_ROLLBACK";
     }
 
