@@ -16,9 +16,10 @@ namespace stripMap_Editor.Forms
 {
     public partial class MainForm : Form
     {
-        public string LoggedInUserId { get; set; }
+        public string LoggedInUserId   { get; set; }
         public string LoggedInUserName { get; set; }
         public string LoggedInUserRole { get; set; }
+        public RvManager Rv            { get; set; }
 
         private DataTable originalData; // 원본 데이터 저장용 (PCB 원복 탭)
         private DataTable lotIdData; // Lot ID 변경 탭 데이터
@@ -26,6 +27,7 @@ namespace stripMap_Editor.Forms
 
         // 관리자 탭 (동적 생성)
         private TabPage _tabPageAdmin;
+        private TabPage _prevTabPage;   // 관리자 탭 클릭 직전에 보던 탭
         
         // 사용자 권한 관련
         private UserRole currentUserRole = UserRole.USER;
@@ -157,19 +159,28 @@ namespace stripMap_Editor.Forms
         private void TabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (_tabPageAdmin == null || tabControl_Strip.SelectedTab != _tabPageAdmin)
-                return;
-
-            // 관리자 탭 클릭 → 첫 번째 일반 탭으로 되돌린 후 AdminForm 팝업
-            for (int i = 0; i < tabControl_Strip.TabCount; i++)
             {
-                if (tabControl_Strip.TabPages[i] != _tabPageAdmin)
+                // 관리자 탭이 아닐 때 → 현재 탭을 기억
+                _prevTabPage = tabControl_Strip.SelectedTab;
+                return;
+            }
+
+            // 관리자 탭 클릭 → 보던 탭으로 복원 후 AdminForm 팝업
+            if (_prevTabPage != null && tabControl_Strip.TabPages.Contains(_prevTabPage))
+                tabControl_Strip.SelectedTab = _prevTabPage;
+            else
+            {
+                for (int i = 0; i < tabControl_Strip.TabCount; i++)
                 {
-                    tabControl_Strip.SelectedIndex = i;
-                    break;
+                    if (tabControl_Strip.TabPages[i] != _tabPageAdmin)
+                    {
+                        tabControl_Strip.SelectedIndex = i;
+                        break;
+                    }
                 }
             }
 
-            using (var adminForm = new AdminForm(currentUserId, LoggedInUserRole, _userPermissions))
+            using (var adminForm = new AdminForm(currentUserId, LoggedInUserRole, _userPermissions, Rv))
                 adminForm.ShowDialog(this);
         }
 
@@ -574,6 +585,7 @@ namespace stripMap_Editor.Forms
                         });
 
                         AppLogger.Info($"[{ActionTypes.LOT_UPDATE}] user={currentUserId} | stripNo={stripNo} | {oldLotId} → {newLotId}");
+                        SendMesRvMessage(stripNo, "L", ActionTypes.LOT_UPDATE);
                         successCount++;
                     }
                     catch (SqlException sqlex)
@@ -1069,6 +1081,7 @@ namespace stripMap_Editor.Forms
                         });
 
                         AppLogger.Info($"[{ActionTypes.STRIP_DELETE}] user={currentUserId} | stripNo={stripNo} | 사유={comment}");
+                        SendMesRvMessage(stripNo, "D", ActionTypes.STRIP_DELETE);
                         successCount++;
                     }
                     catch (SqlException sqlex)
@@ -1808,6 +1821,7 @@ namespace stripMap_Editor.Forms
                         });
 
                         AppLogger.Info($"[{ActionTypes.STRIP_ROLLBACK}] user={currentUserId} | stripNo={stripNo} | timekey={targetTimekey}");
+                        SendMesRvMessage(stripNo, "R", ActionTypes.STRIP_ROLLBACK);
                         successCount++;
                     }
                     catch (SqlException sqlex)
@@ -1939,6 +1953,45 @@ namespace stripMap_Editor.Forms
             string text = item.SubItems[col].Text;
             if (!string.IsNullOrEmpty(text))
                 Clipboard.SetText(text);
+        }
+
+        // ─────────────────────────────────────────────
+        // MES RV 메시지 송신
+        // ─────────────────────────────────────────────
+
+        /// <summary>
+        /// MES 전송용 XML 메시지를 생성합니다.
+        /// </summary>
+        private string BuildMesRvXml(string frameId, string actionType, string functionId)
+        {
+            return
+                "<message>" +
+                  "<header>" +
+                    $"<messagename>{functionId}</messagename>" +
+                  "</header>" +
+                  "<body>" +
+                    $"<FRAME_ID>{frameId}</FRAME_ID>" +
+                    $"<ACTIONTYPE>{actionType}</ACTIONTYPE>" +
+                    "<FRAME_LOC_XPOS></FRAME_LOC_XPOS>" +
+                    "<FRAME_LOC_YPOS></FRAME_LOC_YPOS>" +
+                  "</body>" +
+                "</message>";
+        }
+
+        /// <summary>
+        /// MES RV 메시지를 전송합니다. RV 미연결 시 로그만 남기고 무시합니다.
+        /// </summary>
+        private void SendMesRvMessage(string frameId, string actionType, string functionId)
+        {
+            if (Rv == null || !Rv.IsConnected) return;
+            try
+            {
+                Rv.RvSend(Rv.Subject, BuildMesRvXml(frameId, actionType, functionId));
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Info($"[RV_SEND_FAIL] frameId={frameId} actionType={actionType} | {ex.Message}");
+            }
         }
 
         /// <summary>

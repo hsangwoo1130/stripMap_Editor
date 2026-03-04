@@ -46,6 +46,12 @@ namespace StripMapEditor.Database
             _iniFile.Write("Database", "Password", "");
             _iniFile.Write("Database", "Timeout",  "5");
             _iniFile.Write("Database", "Encrypt",  "false");
+
+            _iniFile.Write("RV", "Service",    "");
+            _iniFile.Write("RV", "Network",    "");
+            _iniFile.Write("RV", "Daemon",     "");
+            _iniFile.Write("RV", "Subject",    "");
+            _iniFile.Write("RV", "Simulation", "false");
         }
 
         /// <summary>

@@ -36,6 +36,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <!-- TIBCO Rendezvous DLL 경로: 변경 시 아래 HintPath 수정 -->
+    <Reference Include="TIBCO.Rendezvous">
+      <HintPath>C:\TIBCO\TIBRV\bin\TIBCO.Rendezvous.dll</HintPath>
+    </Reference>
     <Reference Include="Konscious.Security.Cryptography.Argon2">
       <HintPath>packages\Konscious.Security.Cryptography.Argon2.1.3.1\lib\net46\Konscious.Security.Cryptography.Argon2.dll</HintPath>
     </Reference>
@@ -127,6 +131,7 @@
     <Compile Include="UserRole.cs" />
     <Compile Include="Utils\AppLogger.cs" />
     <Compile Include="Utils\IniFileHelper.cs" />
+    <Compile Include="Utils\RvManager.cs" />
     <EmbeddedResource Include="Forms\AdminForm.resx">
       <DependentUpon>AdminForm.cs</DependentUpon>
     </EmbeddedResource>
