@@ -23,7 +23,10 @@ namespace StripMapEditor
 
             if (loginForm.ShowDialog() == DialogResult.OK)
             {
-                using (RvManager rv = CreateRvManager())
+                RvManager rv = CreateRvManager();
+                if (rv == null) return;
+
+                using (rv)
                 {
                     MainForm mainForm = new MainForm();
                     mainForm.LoggedInUserId   = loginForm.LoggedInUserId;
@@ -74,14 +77,30 @@ namespace StripMapEditor
             if (string.IsNullOrWhiteSpace(service) || string.IsNullOrWhiteSpace(network)
                 || string.IsNullOrWhiteSpace(daemon) || string.IsNullOrWhiteSpace(subject))
             {
-                AppLogger.Info("[RV] config.ini [RV] 설정이 비어 있어 RV 기능을 비활성화합니다.");
-                return rv;
+                AppLogger.Info("[RV] config.ini [RV] 설정이 비어 있어 프로그램을 종료합니다.");
+                MessageBox.Show(
+                    "RV 연결 정보가 설정되지 않았습니다.\nconfig.ini [RV] 섹션의 Service / Network / Daemon / Subject를 입력 후 재시작하세요.",
+                    "RV 연결 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
             }
 
             if (!rv.RvInit())
-                AppLogger.Info("[RV] 초기화 실패 — RV 기능이 비활성화됩니다.");
-            else if (!rv.RvConnect())
-                AppLogger.Info("[RV] 연결 실패 — RV 기능이 비활성화됩니다.");
+            {
+                AppLogger.Info("[RV] 초기화 실패 — 프로그램을 종료합니다.");
+                MessageBox.Show(
+                    "TIBCO Rendezvous 초기화에 실패했습니다.\nTIBCO RV 설치 여부를 확인하세요.",
+                    "RV 연결 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+
+            if (!rv.RvConnect())
+            {
+                AppLogger.Info("[RV] 연결 실패 — 프로그램을 종료합니다.");
+                MessageBox.Show(
+                    "TIBCO Rendezvous 연결에 실패했습니다.\nconfig.ini [RV] 설정값을 확인하세요.",
+                    "RV 연결 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
 
             return rv;
         }
