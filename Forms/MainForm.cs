@@ -228,6 +228,9 @@ namespace stripMap_Editor.Forms
             listViewResult_MapArray_BinCode.MouseDoubleClick += ListViewResultMapArrayBinCode_MouseDoubleClick;
             listViewResult_MapArray.SelectedIndexChanged          += ListViewResultMapArray_SelectedIndexChanged;
             listViewResult_MapArray_BinCode.SelectedIndexChanged  += ListViewResultMapArrayBinCode_SelectedIndexChanged;
+            this.checkBoxVFlip.CheckedChanged  += CheckBoxFlip_CheckedChanged;
+            this.checkBoxHFlip.CheckedChanged  += CheckBoxFlip_CheckedChanged;
+            this.btnRefreshGrid.Click          += BtnRefreshGrid_Click;
 
             // PCB 2D ID 원복 탭 이벤트
             btnSearch_PCB.Click += BtnSearch_Click;
@@ -729,6 +732,11 @@ namespace stripMap_Editor.Forms
         private DataTable mapArrayData; // MapArray 탭 데이터
         private Dictionary<string, MapArrayModification> modifiedMapArrays; // 수정된 MapArray 저장
 
+        // 그리드 시각화용 현재 선택 데이터
+        private string _currentMapArray = "";
+        private int    _currentColCnt   = 0;
+        private int    _currentRowCnt   = 0;
+
         // MapArray 수정 데이터 구조
         private class MapArrayModification
         {
@@ -777,7 +785,9 @@ namespace stripMap_Editor.Forms
                 stripNo,
                 process,
                 mapArray,
-                bincode
+                bincode,
+                colCnt,
+                rowCnt
             FROM dbo.[tblStripMap]
             WHERE active = 1
                 AND stripNo LIKE @StripNo
@@ -845,6 +855,70 @@ namespace stripMap_Editor.Forms
 
             listViewResult_MapArray.EndUpdate();
             listViewResult_MapArray_BinCode.EndUpdate();
+        }
+
+        /// <summary>
+        /// MapArray 문자열을 2D 그리드 텍스트로 변환하여 richTextBoxGrid에 출력한다.
+        /// 좌표 규칙: 오른쪽→왼쪽 채움 (pos=1 → Col=colCnt)
+        /// </summary>
+        private void DrawGrid(string mapArray, int colCnt, int rowCnt, bool flipV, bool flipH)
+        {
+            if (string.IsNullOrEmpty(mapArray) || colCnt <= 0)
+            {
+                richTextBoxGrid.Text = "데이터 없음";
+                return;
+            }
+
+            int len = mapArray.Length;
+            if (rowCnt <= 0) rowCnt = len / colCnt;
+            if (rowCnt <= 0)
+            {
+                richTextBoxGrid.Text = "데이터 없음";
+                return;
+            }
+
+            char[,] grid = new char[rowCnt + 1, colCnt + 1];
+
+            // 초기화
+            for (int r = 1; r <= rowCnt; r++)
+                for (int c = 1; c <= colCnt; c++)
+                    grid[r, c] = '0';
+
+            // 좌표 변환 (자리수 기준, 오른쪽→왼쪽)
+            for (int pos = 1; pos <= len && pos <= rowCnt * colCnt; pos++)
+            {
+                int r = ((pos - 1) / colCnt) + 1;
+                int c = colCnt - ((pos - 1) % colCnt);
+
+                if (flipV) r = rowCnt - r + 1;
+                if (flipH) c = colCnt - c + 1;
+
+                if (r >= 1 && r <= rowCnt && c >= 1 && c <= colCnt)
+                    grid[r, c] = mapArray[pos - 1];
+            }
+
+            // 텍스트 생성
+            var sb = new System.Text.StringBuilder();
+
+            // 헤더 행
+            sb.Append("      ");
+            for (int c = 1; c <= colCnt; c++)
+                sb.Append($" C{c:00}");
+            sb.AppendLine();
+
+            // 데이터 행
+            for (int r = 1; r <= rowCnt; r++)
+            {
+                sb.Append($"R{r:00}   ");
+                for (int c = 1; c <= colCnt; c++)
+                {
+                    char val = grid[r, c];
+                    sb.Append(val == '2' ? "  ■ " : "  · ");
+                }
+                sb.AppendLine();
+            }
+
+            richTextBoxGrid.Text = sb.ToString();
         }
 
         private void ListViewResultMapArray_ItemChecked(object sender, ItemCheckedEventArgs e)
@@ -926,6 +1000,32 @@ namespace stripMap_Editor.Forms
             _syncingSelection = true;
             try { SyncListViewSelection(listViewResult_MapArray, listViewResult_MapArray_BinCode); }
             finally { _syncingSelection = false; }
+
+            // 선택 행 그리드 렌더링
+            if (listViewResult_MapArray.SelectedItems.Count == 0) return;
+            var row = listViewResult_MapArray.SelectedItems[0].Tag as System.Data.DataRow;
+            if (row == null) return;
+
+            _currentMapArray = row["mapArray"]?.ToString() ?? "";
+            _currentColCnt   = row.Table.Columns.Contains("colCnt") && row["colCnt"] != DBNull.Value
+                               ? Convert.ToInt32(row["colCnt"]) : 0;
+            _currentRowCnt   = row.Table.Columns.Contains("rowCnt") && row["rowCnt"] != DBNull.Value
+                               ? Convert.ToInt32(row["rowCnt"]) : 0;
+
+            DrawGrid(_currentMapArray, _currentColCnt, _currentRowCnt,
+                     checkBoxVFlip.Checked, checkBoxHFlip.Checked);
+        }
+
+        private void CheckBoxFlip_CheckedChanged(object sender, EventArgs e)
+        {
+            DrawGrid(_currentMapArray, _currentColCnt, _currentRowCnt,
+                     checkBoxVFlip.Checked, checkBoxHFlip.Checked);
+        }
+
+        private void BtnRefreshGrid_Click(object sender, EventArgs e)
+        {
+            DrawGrid(_currentMapArray, _currentColCnt, _currentRowCnt,
+                     checkBoxVFlip.Checked, checkBoxHFlip.Checked);
         }
 
         private void ListViewResultMapArrayBinCode_SelectedIndexChanged(object sender, EventArgs e)

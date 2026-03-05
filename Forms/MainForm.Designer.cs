@@ -63,6 +63,11 @@ namespace stripMap_Editor.Forms
             this.columnHeaderMapArray_BinCode1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderMapArray_BinCode2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panelSearchMapArray = new System.Windows.Forms.Panel();
+            this.panelMapGrid    = new System.Windows.Forms.Panel();
+            this.checkBoxVFlip   = new System.Windows.Forms.CheckBox();
+            this.checkBoxHFlip   = new System.Windows.Forms.CheckBox();
+            this.btnRefreshGrid  = new System.Windows.Forms.Button();
+            this.richTextBoxGrid = new System.Windows.Forms.RichTextBox();
             this.btnSearch_MapArray = new System.Windows.Forms.Button();
             this.textBox_PCB_MapArray = new System.Windows.Forms.TextBox();
             this.labelPCBId_MapArray = new System.Windows.Forms.Label();
@@ -100,6 +105,7 @@ namespace stripMap_Editor.Forms
             this.panelInputMapArray.SuspendLayout();
             this.panelResult_MapArray.SuspendLayout();
             this.panelSearchMapArray.SuspendLayout();
+            this.panelMapGrid.SuspendLayout();
             this.tabPagePcbRestore.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_PCB_Logo)).BeginInit();
             this.panelResult_PCB.SuspendLayout();
@@ -356,6 +362,7 @@ namespace stripMap_Editor.Forms
             this.tabPageMapArray.Controls.Add(this.panelInputMapArray);
             this.tabPageMapArray.Controls.Add(this.panelResult_MapArray);
             this.tabPageMapArray.Controls.Add(this.panelSearchMapArray);
+            this.tabPageMapArray.Controls.Add(this.panelMapGrid);
             this.tabPageMapArray.Controls.Add(this.btnUpdate_MapArray);
             this.tabPageMapArray.Controls.Add(this.btnDelete_MapArray);
             this.tabPageMapArray.Cursor = System.Windows.Forms.Cursors.Arrow;
@@ -559,7 +566,65 @@ namespace stripMap_Editor.Forms
             this.panelSearchMapArray.Name = "panelSearchMapArray";
             this.panelSearchMapArray.Size = new System.Drawing.Size(518, 175);
             this.panelSearchMapArray.TabIndex = 0;
-            // 
+            //
+            // panelMapGrid
+            //
+            this.panelMapGrid.BackColor    = System.Drawing.Color.White;
+            this.panelMapGrid.BorderStyle  = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.panelMapGrid.Location     = new System.Drawing.Point(545, 21);
+            this.panelMapGrid.Name         = "panelMapGrid";
+            this.panelMapGrid.Size         = new System.Drawing.Size(511, 175);
+            this.panelMapGrid.TabIndex     = 10;
+            this.panelMapGrid.Controls.Add(this.checkBoxVFlip);
+            this.panelMapGrid.Controls.Add(this.checkBoxHFlip);
+            this.panelMapGrid.Controls.Add(this.btnRefreshGrid);
+            this.panelMapGrid.Controls.Add(this.richTextBoxGrid);
+            //
+            // checkBoxVFlip
+            //
+            this.checkBoxVFlip.AutoSize   = true;
+            this.checkBoxVFlip.Checked    = true;
+            this.checkBoxVFlip.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxVFlip.Font       = new System.Drawing.Font("맑은 고딕", 9.75F);
+            this.checkBoxVFlip.Location   = new System.Drawing.Point(10, 8);
+            this.checkBoxVFlip.Name       = "checkBoxVFlip";
+            this.checkBoxVFlip.Text       = "Vertical Flip";
+            this.checkBoxVFlip.TabIndex   = 0;
+            //
+            // checkBoxHFlip
+            //
+            this.checkBoxHFlip.AutoSize   = true;
+            this.checkBoxHFlip.Checked    = true;
+            this.checkBoxHFlip.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxHFlip.Font       = new System.Drawing.Font("맑은 고딕", 9.75F);
+            this.checkBoxHFlip.Location   = new System.Drawing.Point(130, 8);
+            this.checkBoxHFlip.Name       = "checkBoxHFlip";
+            this.checkBoxHFlip.Text       = "Horizontal Flip";
+            this.checkBoxHFlip.TabIndex   = 1;
+            //
+            // btnRefreshGrid
+            //
+            this.btnRefreshGrid.Font     = new System.Drawing.Font("맑은 고딕", 9.75F);
+            this.btnRefreshGrid.Location = new System.Drawing.Point(390, 5);
+            this.btnRefreshGrid.Name     = "btnRefreshGrid";
+            this.btnRefreshGrid.Size     = new System.Drawing.Size(100, 28);
+            this.btnRefreshGrid.TabIndex = 2;
+            this.btnRefreshGrid.Text     = "새로고침";
+            //
+            // richTextBoxGrid
+            //
+            this.richTextBoxGrid.BackColor  = System.Drawing.Color.White;
+            this.richTextBoxGrid.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.richTextBoxGrid.Font        = new System.Drawing.Font("Courier New", 8.25F);
+            this.richTextBoxGrid.Location    = new System.Drawing.Point(5, 38);
+            this.richTextBoxGrid.Name        = "richTextBoxGrid";
+            this.richTextBoxGrid.ReadOnly    = true;
+            this.richTextBoxGrid.ScrollBars  = System.Windows.Forms.RichTextBoxScrollBars.Both;
+            this.richTextBoxGrid.Size        = new System.Drawing.Size(497, 128);
+            this.richTextBoxGrid.TabIndex    = 3;
+            this.richTextBoxGrid.Text        = "";
+            this.richTextBoxGrid.WordWrap    = false;
+            //
             // btnSearch_MapArray
             // 
             this.btnSearch_MapArray.BackColor = System.Drawing.Color.CornflowerBlue;
@@ -883,6 +948,8 @@ namespace stripMap_Editor.Forms
             this.panelResult_MapArray.ResumeLayout(false);
             this.panelSearchMapArray.ResumeLayout(false);
             this.panelSearchMapArray.PerformLayout();
+            this.panelMapGrid.ResumeLayout(false);
+            this.panelMapGrid.PerformLayout();
             this.tabPagePcbRestore.ResumeLayout(false);
             this.tabPagePcbRestore.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_PCB_Logo)).EndInit();
@@ -1069,6 +1136,13 @@ namespace stripMap_Editor.Forms
         private System.Windows.Forms.TextBox textBoxBinCode;
         private Controls.RoundedButton btnDelete_MapArray;
         private Controls.RoundedButton btnUpdate_MapArray;
+
+        // MapArray 그리드 시각화 컨트롤
+        private System.Windows.Forms.Panel panelMapGrid;
+        private System.Windows.Forms.CheckBox checkBoxVFlip;
+        private System.Windows.Forms.CheckBox checkBoxHFlip;
+        private System.Windows.Forms.Button btnRefreshGrid;
+        private System.Windows.Forms.RichTextBox richTextBoxGrid;
 
         // PCB 2D ID 원복 탭 컨트롤들
         private System.Windows.Forms.Panel panelSearch;
