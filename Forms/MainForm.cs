@@ -230,7 +230,6 @@ namespace stripMap_Editor.Forms
             listViewResult_MapArray_BinCode.SelectedIndexChanged  += ListViewResultMapArrayBinCode_SelectedIndexChanged;
             this.checkBoxVFlip.CheckedChanged  += CheckBoxFlip_CheckedChanged;
             this.checkBoxHFlip.CheckedChanged  += CheckBoxFlip_CheckedChanged;
-            this.btnRefreshGrid.Click          += BtnRefreshGrid_Click;
 
             // PCB 2D ID 원복 탭 이벤트
             btnSearch_PCB.Click += BtnSearch_Click;
@@ -1022,12 +1021,6 @@ namespace stripMap_Editor.Forms
                      checkBoxVFlip.Checked, checkBoxHFlip.Checked);
         }
 
-        private void BtnRefreshGrid_Click(object sender, EventArgs e)
-        {
-            DrawGrid(_currentMapArray, _currentColCnt, _currentRowCnt,
-                     checkBoxVFlip.Checked, checkBoxHFlip.Checked);
-        }
-
         private void ListViewResultMapArrayBinCode_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (_syncingSelection) return;
@@ -1297,7 +1290,15 @@ namespace stripMap_Editor.Forms
                 if (result == DialogResult.Yes)
                 {
                     this.Cursor = Cursors.WaitCursor;
-                    UpdateMapArrayData(checkedItems, newMapArray, newBinCode);
+                    int colCnt = 0;
+                    if (checkedItems.Count > 0)
+                    {
+                        var firstRow = checkedItems[0].Tag as DataRow;
+                        if (firstRow != null && firstRow.Table.Columns.Contains("colCnt")
+                            && firstRow["colCnt"] != DBNull.Value)
+                            colCnt = Convert.ToInt32(firstRow["colCnt"]);
+                    }
+                    UpdateMapArrayData(checkedItems, newMapArray, newBinCode, colCnt);
                 }
             }
             catch (Exception ex)
@@ -1315,7 +1316,7 @@ namespace stripMap_Editor.Forms
         /// MapArray 수정 — SP 'U' (usp_StripMap_Process)
         /// SP의 COALESCE(@mapArray, mapArray) 처리: 빈 값이면 NULL 전달 → 기존 값 유지
         /// </summary>
-        private void UpdateMapArrayData(List<ListViewItem> checkedItems, string newMapArray, string newBinCode)
+        private void UpdateMapArrayData(List<ListViewItem> checkedItems, string newMapArray, string newBinCode, int colCnt)
         {
             int successCount = 0;
             int failCount = 0;
@@ -1339,6 +1340,17 @@ namespace stripMap_Editor.Forms
                         object mapArrayParam = string.IsNullOrEmpty(newMapArray) ? (object)DBNull.Value : newMapArray;
                         object bincodeParam  = string.IsNullOrEmpty(newBinCode)  ? (object)DBNull.Value : newBinCode;
 
+                        // 변경 좌표 계산
+                        string origMapArray = row["mapArray"]?.ToString() ?? "";
+                        (List<int> xList, List<int> yList) changedCoords = (new List<int>(), new List<int>());
+                        if (!string.IsNullOrEmpty(newMapArray) && colCnt > 0)
+                            changedCoords = CalcChangedCoords(origMapArray, newMapArray, colCnt);
+
+                        string xposList = changedCoords.xList.Count > 0
+                            ? string.Join(",", changedCoords.xList) : null;
+                        string yposList = changedCoords.yList.Count > 0
+                            ? string.Join(",", changedCoords.yList) : null;
+
                         DatabaseHelper.ExecuteStoredProcedureNonQuery("dbo.usp_StripMap_Process", new SqlParameter[]
                         {
                             new SqlParameter("@actionType",    SqlDbType.Char, 1) { Value = "U" },
@@ -1350,10 +1362,15 @@ namespace stripMap_Editor.Forms
                             new SqlParameter("@targetTimekey", DBNull.Value),
                             new SqlParameter("@workerId",      currentUserId),
                             new SqlParameter("@comment",       "MapArray/BinCode 수정"),
-                            new SqlParameter("@workerIp",      workerIp)
+                            new SqlParameter("@workerIp",      workerIp),
+                            new SqlParameter("@changedXpos",   (object)xposList ?? DBNull.Value),
+                            new SqlParameter("@changedYpos",   (object)yposList ?? DBNull.Value)
                         });
 
                         AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}] user={currentUserId} | stripNo={stripNo} | mapArray={newMapArray} binCode={newBinCode}");
+                        for (int i = 0; i < changedCoords.xList.Count; i++)
+                            SendMesRvMessage(stripNo, "U", ActionTypes.STRIP_UPDATE,
+                                             changedCoords.xList[i], changedCoords.yList[i]);
                         successCount++;
                     }
                     catch (SqlException sqlex)
@@ -1385,6 +1402,34 @@ namespace stripMap_Editor.Forms
                 MessageBox.Show($"수정 처리 중 오류: {ex.Message}", "오류",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        /// <summary>
+        /// 구 mapArray와 신 mapArray를 비교하여 변경된 셀의 Gold Gate 좌표 목록을 반환한다.
+        /// Gold Gate X = colCnt - ((pos-1) % colCnt)  [16→1, 좌→우]
+        /// Gold Gate Y = ((pos-1) / colCnt) + 1         [1→rowCnt, 상→하]
+        /// Flip 미적용 — 원본 문자열 위치 기준.
+        /// </summary>
+        private (List<int> xList, List<int> yList) CalcChangedCoords(
+            string oldMap, string newMap, int colCnt)
+        {
+            var xList = new List<int>();
+            var yList = new List<int>();
+
+            if (string.IsNullOrEmpty(oldMap) || string.IsNullOrEmpty(newMap) || colCnt <= 0)
+                return (xList, yList);
+
+            int len = Math.Min(oldMap.Length, newMap.Length);
+            for (int pos = 1; pos <= len; pos++)
+            {
+                if (oldMap[pos - 1] != newMap[pos - 1])
+                {
+                    xList.Add(colCnt - ((pos - 1) % colCnt));
+                    yList.Add(((pos - 1) / colCnt) + 1);
+                }
+            }
+
+            return (xList, yList);
         }
 
         #endregion
@@ -2062,7 +2107,7 @@ namespace stripMap_Editor.Forms
         /// <summary>
         /// MES 전송용 XML 메시지를 생성합니다.
         /// </summary>
-        private string BuildMesRvXml(string frameId, string actionType, string functionId)
+        private string BuildMesRvXml(string frameId, string actionType, string functionId, int xpos = 0, int ypos = 0)
         {
             return
                 "<message>" +
@@ -2072,8 +2117,8 @@ namespace stripMap_Editor.Forms
                   "<body>" +
                     $"<FRAME_ID>{frameId}</FRAME_ID>" +
                     $"<ACTIONTYPE>{actionType}</ACTIONTYPE>" +
-                    "<FRAME_LOC_XPOS></FRAME_LOC_XPOS>" +
-                    "<FRAME_LOC_YPOS></FRAME_LOC_YPOS>" +
+                    $"<FRAME_LOC_XPOS>{xpos}</FRAME_LOC_XPOS>" +
+                    $"<FRAME_LOC_YPOS>{ypos}</FRAME_LOC_YPOS>" +
                   "</body>" +
                 "</message>";
         }
@@ -2081,16 +2126,16 @@ namespace stripMap_Editor.Forms
         /// <summary>
         /// MES RV 메시지를 전송합니다. RV 미연결 시 로그만 남기고 무시합니다.
         /// </summary>
-        private void SendMesRvMessage(string frameId, string actionType, string functionId)
+        private void SendMesRvMessage(string frameId, string actionType, string functionId, int xpos = 0, int ypos = 0)
         {
             if (Rv == null || !Rv.IsConnected) return;
             try
             {
-                Rv.RvSend(Rv.Subject, BuildMesRvXml(frameId, actionType, functionId));
+                Rv.RvSend(Rv.Subject, BuildMesRvXml(frameId, actionType, functionId, xpos, ypos));
             }
             catch (Exception ex)
             {
-                AppLogger.Info($"[RV_SEND_FAIL] frameId={frameId} actionType={actionType} | {ex.Message}");
+                AppLogger.Info($"[RV_SEND_FAIL] frameId={frameId} actionType={actionType} xpos={xpos} ypos={ypos} | {ex.Message}");
             }
         }
 
