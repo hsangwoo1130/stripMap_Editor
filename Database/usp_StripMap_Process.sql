@@ -1,8 +1,5 @@
-IF OBJECT_ID('dbo.usp_StripMap_Process', 'P') IS NOT NULL
-    DROP PROCEDURE dbo.usp_StripMap_Process;
-GO
-
-CREATE PROCEDURE [dbo].[usp_StripMap_Process]
+-- CREATE OR ALTER: 기존 권한(GRANT EXECUTE 등)을 유지하면서 SP를 수정합니다.
+CREATE OR ALTER PROCEDURE [dbo].[usp_StripMap_Process]
 (
     @actionType      CHAR(1),
     @stripNo         VARCHAR(80),
