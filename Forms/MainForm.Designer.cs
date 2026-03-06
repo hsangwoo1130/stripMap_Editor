@@ -716,31 +716,31 @@ namespace stripMap_Editor.Forms
             // 
             // labelResultTitle
             // 
-            this.labelResultTitle.AutoSize = true;
+            this.labelResultTitle.AutoSize  = false;
             this.labelResultTitle.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.labelResultTitle.Location = new System.Drawing.Point(21, 217);
             this.labelResultTitle.Name = "labelResultTitle";
-            this.labelResultTitle.Size = new System.Drawing.Size(65, 17);
+            this.labelResultTitle.Size     = new System.Drawing.Size(165, 17);
             this.labelResultTitle.TabIndex = 4;
             this.labelResultTitle.Text = "조회 결과";
             //
             // btnPrevPeriod
             //
             this.btnPrevPeriod.Font     = new System.Drawing.Font("맑은 고딕", 9F);
-            this.btnPrevPeriod.Location = new System.Drawing.Point(500, 212);
+            this.btnPrevPeriod.Location = new System.Drawing.Point(190, 214);
             this.btnPrevPeriod.Name     = "btnPrevPeriod";
-            this.btnPrevPeriod.Size     = new System.Drawing.Size(65, 24);
+            this.btnPrevPeriod.Size     = new System.Drawing.Size(24, 22);
             this.btnPrevPeriod.TabIndex = 20;
-            this.btnPrevPeriod.Text     = "◀ 이전";
+            this.btnPrevPeriod.Text     = "◀";
             this.btnPrevPeriod.UseVisualStyleBackColor = true;
             //
             // labelPeriod
             //
             this.labelPeriod.AutoSize  = false;
             this.labelPeriod.Font      = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
-            this.labelPeriod.Location  = new System.Drawing.Point(572, 216);
+            this.labelPeriod.Location  = new System.Drawing.Point(217, 217);
             this.labelPeriod.Name      = "labelPeriod";
-            this.labelPeriod.Size      = new System.Drawing.Size(220, 17);
+            this.labelPeriod.Size      = new System.Drawing.Size(190, 17);
             this.labelPeriod.TabIndex  = 21;
             this.labelPeriod.Text      = "";
             this.labelPeriod.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -749,11 +749,11 @@ namespace stripMap_Editor.Forms
             //
             this.btnNextPeriod.Enabled  = false;
             this.btnNextPeriod.Font     = new System.Drawing.Font("맑은 고딕", 9F);
-            this.btnNextPeriod.Location = new System.Drawing.Point(800, 212);
+            this.btnNextPeriod.Location = new System.Drawing.Point(410, 214);
             this.btnNextPeriod.Name     = "btnNextPeriod";
-            this.btnNextPeriod.Size     = new System.Drawing.Size(65, 24);
+            this.btnNextPeriod.Size     = new System.Drawing.Size(24, 22);
             this.btnNextPeriod.TabIndex = 22;
-            this.btnNextPeriod.Text     = "다음 ▶";
+            this.btnNextPeriod.Text     = "▶";
             this.btnNextPeriod.UseVisualStyleBackColor = true;
             //
             // panelResult_PCB
