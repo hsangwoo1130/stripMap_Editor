@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using System.Windows.Forms;
 using stripMap_Editor.Forms;
 using StripMapEditor.Utils;
@@ -15,6 +16,10 @@ namespace StripMapEditor
         static void Main()
         {
             AppLogger.Initialize();
+
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += Application_ThreadException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -39,6 +44,31 @@ namespace StripMapEditor
             }
 
             AppLogger.Close();
+        }
+
+        /// <summary>
+        /// UI 스레드 미처리 예외 핸들러
+        /// </summary>
+        private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+        {
+            AppLogger.Info($"[UNHANDLED_EXCEPTION] UI Thread: {e.Exception}");
+            MessageBox.Show(
+                $"예기치 않은 오류가 발생했습니다.\n\n{e.Exception.Message}",
+                "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        /// <summary>
+        /// 비-UI 스레드 미처리 예외 핸들러
+        /// </summary>
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            var ex = e.ExceptionObject as Exception;
+            AppLogger.Info($"[UNHANDLED_EXCEPTION] Domain: {ex?.ToString() ?? e.ExceptionObject.ToString()}");
+            AppLogger.Close();
+
+            MessageBox.Show(
+                $"치명적인 오류가 발생하여 프로그램을 종료합니다.\n\n{ex?.Message ?? "알 수 없는 오류"}",
+                "치명적 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         /// <summary>
