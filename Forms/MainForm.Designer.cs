@@ -66,7 +66,7 @@ namespace stripMap_Editor.Forms
             this.panelMapGrid    = new System.Windows.Forms.Panel();
             this.checkBoxVFlip   = new System.Windows.Forms.CheckBox();
             this.checkBoxHFlip   = new System.Windows.Forms.CheckBox();
-            this.btnRefreshGrid  = new System.Windows.Forms.Button();
+
             this.richTextBoxGrid = new System.Windows.Forms.RichTextBox();
             this.btnSearch_MapArray = new System.Windows.Forms.Button();
             this.textBox_PCB_MapArray = new System.Windows.Forms.TextBox();
@@ -95,6 +95,9 @@ namespace stripMap_Editor.Forms
             this.labelLOTId = new System.Windows.Forms.Label();
             this.btnPurgeRollback_PCB = new stripMap_Editor.Controls.RoundedButton();
             this.btnRestore_PCB = new stripMap_Editor.Controls.RoundedButton();
+            this.btnPrevPeriod = new System.Windows.Forms.Button();
+            this.labelPeriod   = new System.Windows.Forms.Label();
+            this.btnNextPeriod = new System.Windows.Forms.Button();
             this.tabControl_Strip.SuspendLayout();
             this.tabPageLotId.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_LotId_Logo)).BeginInit();
@@ -577,14 +580,14 @@ namespace stripMap_Editor.Forms
             this.panelMapGrid.TabIndex     = 10;
             this.panelMapGrid.Controls.Add(this.checkBoxVFlip);
             this.panelMapGrid.Controls.Add(this.checkBoxHFlip);
-            this.panelMapGrid.Controls.Add(this.btnRefreshGrid);
+
             this.panelMapGrid.Controls.Add(this.richTextBoxGrid);
             //
             // checkBoxVFlip
             //
             this.checkBoxVFlip.AutoSize   = true;
-            this.checkBoxVFlip.Checked    = true;
-            this.checkBoxVFlip.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxVFlip.Checked    = false;
+            this.checkBoxVFlip.CheckState = System.Windows.Forms.CheckState.Unchecked;
             this.checkBoxVFlip.Font       = new System.Drawing.Font("맑은 고딕", 9.75F);
             this.checkBoxVFlip.Location   = new System.Drawing.Point(10, 8);
             this.checkBoxVFlip.Name       = "checkBoxVFlip";
@@ -594,22 +597,13 @@ namespace stripMap_Editor.Forms
             // checkBoxHFlip
             //
             this.checkBoxHFlip.AutoSize   = true;
-            this.checkBoxHFlip.Checked    = true;
-            this.checkBoxHFlip.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxHFlip.Checked    = false;
+            this.checkBoxHFlip.CheckState = System.Windows.Forms.CheckState.Unchecked;
             this.checkBoxHFlip.Font       = new System.Drawing.Font("맑은 고딕", 9.75F);
             this.checkBoxHFlip.Location   = new System.Drawing.Point(130, 8);
             this.checkBoxHFlip.Name       = "checkBoxHFlip";
             this.checkBoxHFlip.Text       = "Horizontal Flip";
             this.checkBoxHFlip.TabIndex   = 1;
-            //
-            // btnRefreshGrid
-            //
-            this.btnRefreshGrid.Font     = new System.Drawing.Font("맑은 고딕", 9.75F);
-            this.btnRefreshGrid.Location = new System.Drawing.Point(390, 5);
-            this.btnRefreshGrid.Name     = "btnRefreshGrid";
-            this.btnRefreshGrid.Size     = new System.Drawing.Size(100, 28);
-            this.btnRefreshGrid.TabIndex = 2;
-            this.btnRefreshGrid.Text     = "새로고침";
             //
             // richTextBoxGrid
             //
@@ -694,6 +688,9 @@ namespace stripMap_Editor.Forms
             this.tabPagePcbRestore.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.tabPagePcbRestore.Controls.Add(this.pictureBox_PCB_Logo);
             this.tabPagePcbRestore.Controls.Add(this.labelResultTitle);
+            this.tabPagePcbRestore.Controls.Add(this.btnPrevPeriod);
+            this.tabPagePcbRestore.Controls.Add(this.labelPeriod);
+            this.tabPagePcbRestore.Controls.Add(this.btnNextPeriod);
             this.tabPagePcbRestore.Controls.Add(this.panelResult_PCB);
             this.tabPagePcbRestore.Controls.Add(this.panelSearch);
             this.tabPagePcbRestore.Controls.Add(this.btnPurgeRollback_PCB);
@@ -726,7 +723,39 @@ namespace stripMap_Editor.Forms
             this.labelResultTitle.Size = new System.Drawing.Size(65, 17);
             this.labelResultTitle.TabIndex = 4;
             this.labelResultTitle.Text = "조회 결과";
-            // 
+            //
+            // btnPrevPeriod
+            //
+            this.btnPrevPeriod.Font     = new System.Drawing.Font("맑은 고딕", 9F);
+            this.btnPrevPeriod.Location = new System.Drawing.Point(500, 212);
+            this.btnPrevPeriod.Name     = "btnPrevPeriod";
+            this.btnPrevPeriod.Size     = new System.Drawing.Size(65, 24);
+            this.btnPrevPeriod.TabIndex = 20;
+            this.btnPrevPeriod.Text     = "◀ 이전";
+            this.btnPrevPeriod.UseVisualStyleBackColor = true;
+            //
+            // labelPeriod
+            //
+            this.labelPeriod.AutoSize  = false;
+            this.labelPeriod.Font      = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            this.labelPeriod.Location  = new System.Drawing.Point(572, 216);
+            this.labelPeriod.Name      = "labelPeriod";
+            this.labelPeriod.Size      = new System.Drawing.Size(220, 17);
+            this.labelPeriod.TabIndex  = 21;
+            this.labelPeriod.Text      = "";
+            this.labelPeriod.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // btnNextPeriod
+            //
+            this.btnNextPeriod.Enabled  = false;
+            this.btnNextPeriod.Font     = new System.Drawing.Font("맑은 고딕", 9F);
+            this.btnNextPeriod.Location = new System.Drawing.Point(800, 212);
+            this.btnNextPeriod.Name     = "btnNextPeriod";
+            this.btnNextPeriod.Size     = new System.Drawing.Size(65, 24);
+            this.btnNextPeriod.TabIndex = 22;
+            this.btnNextPeriod.Text     = "다음 ▶";
+            this.btnNextPeriod.UseVisualStyleBackColor = true;
+            //
             // panelResult_PCB
             // 
             this.panelResult_PCB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
@@ -1141,7 +1170,6 @@ namespace stripMap_Editor.Forms
         private System.Windows.Forms.Panel panelMapGrid;
         private System.Windows.Forms.CheckBox checkBoxVFlip;
         private System.Windows.Forms.CheckBox checkBoxHFlip;
-        private System.Windows.Forms.Button btnRefreshGrid;
         private System.Windows.Forms.RichTextBox richTextBoxGrid;
 
         // PCB 2D ID 원복 탭 컨트롤들
@@ -1165,6 +1193,10 @@ namespace stripMap_Editor.Forms
         private System.Windows.Forms.ColumnHeader columnHeaderPCB6;  // MGZ ID
         private Controls.RoundedButton btnRestore_PCB;
         private Controls.RoundedButton btnPurgeRollback_PCB;
+        // 기간 페이지네이션 컨트롤
+        private System.Windows.Forms.Button btnPrevPeriod;
+        private System.Windows.Forms.Label  labelPeriod;
+        private System.Windows.Forms.Button btnNextPeriod;
 
         // Tab
         private System.Windows.Forms.TabControl tabControl_Strip;

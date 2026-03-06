@@ -22,6 +22,7 @@ namespace stripMap_Editor.Forms
         public RvManager Rv            { get; set; }
 
         private DataTable originalData; // 원본 데이터 저장용 (PCB 원복 탭)
+        private int _periodOffset = 0;  // 0=현재 기간, 1=1개월 전, ...
         private DataTable lotIdData; // Lot ID 변경 탭 데이터
         private Dictionary<string, string> modifiedLotIds; // 수정된 Lot ID 저장 (stripNo, newLotId)
 
@@ -235,6 +236,8 @@ namespace stripMap_Editor.Forms
             btnSearch_PCB.Click += BtnSearch_Click;
             btnRestore_PCB.Click += BtnRestore_Click;
             btnPurgeRollback_PCB.Click += BtnPurgeRollback_Click;
+            btnPrevPeriod.Click += BtnPrevPeriod_Click;
+            btnNextPeriod.Click += BtnNextPeriod_Click;
             listViewResult_PCB.ItemChecked += ListViewResult_ItemChecked;
             listViewResult_PCB.ColumnWidthChanging += ListView_ColumnWidthChanging;
 
@@ -1190,7 +1193,7 @@ namespace stripMap_Editor.Forms
                 }
 
                 AppLogger.Info($"[{ActionTypes.STRIP_DELETE}_RESULT] user={currentUserId} | 성공={successCount} 실패={failCount}");
-                string resultMessage = $"삭제 완료\n\n성공: {successCount}건\n실패: {failCount}건";
+                string resultMessage = $"성공: {successCount}건\n실패: {failCount}건";
                 if (errorLog.Length > 0)
                     resultMessage += $"\n\n오류 내역:\n{errorLog}";
 
@@ -1386,7 +1389,7 @@ namespace stripMap_Editor.Forms
                 }
 
                 AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}_RESULT] user={currentUserId} | 성공={successCount} 실패={failCount}");
-                string resultMessage = $"수정 완료\n\n성공: {successCount}건\n실패: {failCount}건";
+                string resultMessage = $"성공: {successCount}건\n실패: {failCount}건";
                 if (errorLog.Length > 0)
                     resultMessage += $"\n\n오류 내역:\n{errorLog}";
 
@@ -1437,6 +1440,17 @@ namespace stripMap_Editor.Forms
         #region PCB 2D ID 원복 탭
 
         /// <summary>
+        /// offset에 따른 조회 기간(시작일, 종료일)을 반환한다.
+        /// offset=0: 오늘 기준 한 달, offset=1: 1개월 전 한 달, ...
+        /// </summary>
+        private (DateTime start, DateTime end) GetPeriodRange(int offset)
+        {
+            DateTime end   = DateTime.Today.AddMonths(-offset);
+            DateTime start = DateTime.Today.AddMonths(-offset - 1).AddDays(1);
+            return (start, end);
+        }
+
+        /// <summary>
         /// 조회 버튼 클릭 (PCB 원복 탭) - tblStripMapHistory 조회
         /// </summary>
         private void BtnSearch_Click(object sender, EventArgs e)
@@ -1448,7 +1462,9 @@ namespace stripMap_Editor.Forms
                 string mgzRf = textBox_MGZ.Text.Trim();
 
                 // 검색 조건 체크 제거 - 빈 값이어도 전체 조회
-                LoadHistoryData(lotNo, stripNo, mgzRf);
+                _periodOffset = 0;
+                var (start, end) = GetPeriodRange(_periodOffset);
+                LoadHistoryData(lotNo, stripNo, mgzRf, start, end);
             }
             catch (Exception ex)
             {
@@ -1457,7 +1473,8 @@ namespace stripMap_Editor.Forms
             }
         }
 
-        private void LoadHistoryData(string lotNo, string stripNo, string mgzRf)
+        private void LoadHistoryData(string lotNo, string stripNo, string mgzRf,
+                                     DateTime startDate, DateTime endDate)
         {
             try
             {
@@ -1481,6 +1498,12 @@ namespace stripMap_Editor.Forms
                 ");
 
                 var parameters = new List<SqlParameter>();
+
+                // 기간 필터 (timekey 앞 8자리 = yyyyMMdd)
+                queryBuilder.Append(" AND LEFT(timekey, 8) >= @StartDate");
+                queryBuilder.Append(" AND LEFT(timekey, 8) <= @EndDate");
+                parameters.Add(new SqlParameter("@StartDate", startDate.ToString("yyyyMMdd")));
+                parameters.Add(new SqlParameter("@EndDate",   endDate.ToString("yyyyMMdd")));
 
                 if (!string.IsNullOrEmpty(lotNo))
                 {
@@ -1507,6 +1530,10 @@ namespace stripMap_Editor.Forms
                 DisplayHistoryData(dt);
 
                 labelResultTitle.Text = $"조회 결과 ({dt.Rows.Count}건)";
+                // 기간 라벨 갱신
+                labelPeriod.Text = $"{startDate:yyyy-MM-dd} ~ {endDate:yyyy-MM-dd}";
+                // 다음 버튼: offset=0이면 현재 기간이므로 비활성
+                btnNextPeriod.Enabled = (_periodOffset > 0);
 
                 if (dt.Rows.Count == 0)
                 {
@@ -1876,7 +1903,7 @@ namespace stripMap_Editor.Forms
                 }
 
                 AppLogger.Info($"[{ActionTypes.STRIP_PURGE_ROLLBACK}_RESULT] user={currentUserId} | 성공={successCount} 실패={failCount}");
-                string resultMessage = $"Purge 복원 완료\n\n성공: {successCount}건\n실패: {failCount}건";
+                string resultMessage = $"성공: {successCount}건\n실패: {failCount}건";
                 if (errorLog.Length > 0)
                     resultMessage += $"\n\n오류 내역:\n{errorLog}";
 
@@ -1999,6 +2026,28 @@ namespace stripMap_Editor.Forms
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private void BtnPrevPeriod_Click(object sender, EventArgs e)
+        {
+            _periodOffset++;
+            var (start, end) = GetPeriodRange(_periodOffset);
+            string lotNo   = textBox_LOT.Text.Trim();
+            string stripNo = textBox_PCB.Text.Trim();
+            string mgzRf   = textBox_MGZ.Text.Trim();
+            LoadHistoryData(lotNo, stripNo, mgzRf, start, end);
+        }
+
+        private void BtnNextPeriod_Click(object sender, EventArgs e)
+        {
+            if (_periodOffset <= 0) return;
+            _periodOffset--;
+            var (start, end) = GetPeriodRange(_periodOffset);
+            string lotNo   = textBox_LOT.Text.Trim();
+            string stripNo = textBox_PCB.Text.Trim();
+            string mgzRf   = textBox_MGZ.Text.Trim();
+            LoadHistoryData(lotNo, stripNo, mgzRf, start, end);
+        }
+
         #endregion
 
         #region 엔터 키 조회
