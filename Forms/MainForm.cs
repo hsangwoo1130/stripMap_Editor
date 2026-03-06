@@ -269,6 +269,65 @@ namespace stripMap_Editor.Forms
             listViewResult_PCB.KeyDown                    += ListView_CopyKeyDown;
             listViewResult_PCB.MouseDown                  += ListView_MouseDown;
             listViewResult_PCB.ItemDrag                   += ListView_ItemDrag;
+
+            this.FormClosing += MainForm_FormClosing;
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Lot ID 탭
+            btnSearch_LotId.Click        -= BtnSearch2_Click;
+            btnModify_LotId.Click        -= BtnModify_Click;
+            btnUpdate_LotId.Click        -= BtnSave_Click;
+            listViewResult_LotId.ItemChecked        -= ListViewResult2_ItemChecked;
+            listViewResult_LotId.ColumnWidthChanging -= ListView_ColumnWidthChanging;
+
+            // MapArray 탭
+            btnSearch_MapArray.Click     -= BtnSearchMapArray_Click;
+            btnDelete_MapArray.Click     -= BtnDeleteMapArray_Click;
+            btnUpdate_MapArray.Click     -= BtnUpdateMapArray_Click;
+            listViewResult_MapArray.ItemChecked          -= ListViewResultMapArray_ItemChecked;
+            listViewResult_MapArray.ColumnWidthChanging  -= ListView_ColumnWidthChanging;
+            listViewResult_MapArray_BinCode.MouseDoubleClick -= ListViewResultMapArrayBinCode_MouseDoubleClick;
+            listViewResult_MapArray.SelectedIndexChanged         -= ListViewResultMapArray_SelectedIndexChanged;
+            listViewResult_MapArray_BinCode.SelectedIndexChanged -= ListViewResultMapArrayBinCode_SelectedIndexChanged;
+            checkBoxVFlip.CheckedChanged -= CheckBoxFlip_CheckedChanged;
+            checkBoxHFlip.CheckedChanged -= CheckBoxFlip_CheckedChanged;
+
+            // PCB 원복 탭
+            btnSearch_PCB.Click          -= BtnSearch_Click;
+            btnRestore_PCB.Click         -= BtnRestore_Click;
+            btnPurgeRollback_PCB.Click   -= BtnPurgeRollback_Click;
+            btnPrevPeriod.Click          -= BtnPrevPeriod_Click;
+            btnNextPeriod.Click          -= BtnNextPeriod_Click;
+            listViewResult_PCB.ItemChecked        -= ListViewResult_ItemChecked;
+            listViewResult_PCB.ColumnWidthChanging -= ListView_ColumnWidthChanging;
+
+            // 엔터 키 조회
+            textBox_LOT2.KeyDown          -= SearchTextBox_LotId_KeyDown;
+            textBox_PCB2.KeyDown          -= SearchTextBox_LotId_KeyDown;
+            textBox_MGZ2.KeyDown          -= SearchTextBox_LotId_KeyDown;
+            textBox_PCB_MapArray.KeyDown  -= SearchTextBox_MapArray_KeyDown;
+            textBox_LOT.KeyDown           -= SearchTextBox_PCB_KeyDown;
+            textBox_PCB.KeyDown           -= SearchTextBox_PCB_KeyDown;
+            textBox_MGZ.KeyDown           -= SearchTextBox_PCB_KeyDown;
+
+            // ListView 복사/드래그
+            listViewResult_LotId.KeyDown  -= ListView_CopyKeyDown;
+            listViewResult_LotId.MouseDown -= ListView_MouseDown;
+            listViewResult_LotId.ItemDrag  -= ListView_ItemDrag;
+            listViewResult_MapArray.KeyDown  -= ListView_CopyKeyDown;
+            listViewResult_MapArray.MouseDown -= ListView_MouseDown;
+            listViewResult_MapArray.ItemDrag  -= ListView_ItemDrag;
+            listViewResult_MapArray_BinCode.KeyDown  -= ListView_CopyKeyDown;
+            listViewResult_MapArray_BinCode.MouseDown -= ListView_MouseDown;
+            listViewResult_MapArray_BinCode.ItemDrag  -= ListView_ItemDrag;
+            listViewResult_PCB.KeyDown  -= ListView_CopyKeyDown;
+            listViewResult_PCB.MouseDown -= ListView_MouseDown;
+            listViewResult_PCB.ItemDrag  -= ListView_ItemDrag;
+
+            // 탭 컨트롤
+            tabControl_Strip.SelectedIndexChanged -= TabControl_SelectedIndexChanged;
         }
 
         /// <summary>
