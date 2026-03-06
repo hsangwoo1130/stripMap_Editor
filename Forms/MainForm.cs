@@ -311,25 +311,30 @@ namespace stripMap_Editor.Forms
         /// <summary>
         /// 조회 버튼 클릭 (Lot ID 변경 탭)
         /// </summary>
-        private void BtnSearch2_Click(object sender, EventArgs e)
+        private async void BtnSearch2_Click(object sender, EventArgs e)
         {
             try
             {
+                btnSearch_LotId.Enabled = false;
                 string lotNo = textBox_LOT2.Text.Trim();
                 string stripNo = textBox_PCB2.Text.Trim();
                 string mgzRf = textBox_MGZ2.Text.Trim();
 
                 // 검색 조건 체크 제거 - 빈 값이어도 전체 조회
-                LoadLotIdData(lotNo, stripNo, mgzRf);
+                await LoadLotIdDataAsync(lotNo, stripNo, mgzRf);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"조회 중 오류 발생: {ex.Message}", "오류",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            finally
+            {
+                btnSearch_LotId.Enabled = true;
+            }
         }
 
-        private void LoadLotIdData(string lotNo, string stripNo, string mgzRf)
+        private async Task LoadLotIdDataAsync(string lotNo, string stripNo, string mgzRf)
         {
             try
             {
@@ -371,7 +376,9 @@ namespace stripMap_Editor.Forms
 
                 queryBuilder.Append(" ORDER BY stripNo ASC");
 
-                DataTable dt = DatabaseHelper.ExecuteQuery(queryBuilder.ToString(), parameters.ToArray());
+                string query = queryBuilder.ToString();
+                SqlParameter[] paramArray = parameters.ToArray();
+                DataTable dt = await Task.Run(() => DatabaseHelper.ExecuteQuery(query, paramArray));
                 lotIdData = dt.Copy();
                 DisplayLotIdData(dt);
 
@@ -513,7 +520,7 @@ namespace stripMap_Editor.Forms
         /// <summary>
         /// 저장 버튼 클릭
         /// </summary>
-        private void BtnSave_Click(object sender, EventArgs e)
+        private async void BtnSave_Click(object sender, EventArgs e)
         {
             try
             {
@@ -532,8 +539,8 @@ namespace stripMap_Editor.Forms
 
                 if (result == DialogResult.Yes)
                 {
-                    this.Cursor = Cursors.WaitCursor;
-                    SaveLotIdChanges();
+                    btnUpdate_LotId.Enabled = false;
+                    await SaveLotIdChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -543,84 +550,94 @@ namespace stripMap_Editor.Forms
             }
             finally
             {
-                this.Cursor = Cursors.Default;
+                btnUpdate_LotId.Enabled = true;
             }
         }
 
         /// <summary>
         /// Lot ID 변경사항 DB 저장 — SP 'L' (usp_StripMap_Process)
         /// </summary>
-        private void SaveLotIdChanges()
+        private async Task SaveLotIdChangesAsync()
         {
-            int successCount = 0;
-            int failCount = 0;
-            StringBuilder errorLog = new StringBuilder();
             string workerIp = GetLocalIPAddress();
+            // 현재 검색 조건 캡처 (재검색용)
+            string searchLotNo = textBox_LOT2.Text.Trim();
+            string searchStripNo = textBox_PCB2.Text.Trim();
+            string searchMgzRf = textBox_MGZ2.Text.Trim();
 
             try
             {
-                foreach (var kvp in modifiedLotIds)
+                var result = await Task.Run(() =>
                 {
-                    string stripNo = kvp.Key;
-                    string newLotId = kvp.Value;
+                    int successCount = 0;
+                    int failCount = 0;
+                    StringBuilder errorLog = new StringBuilder();
 
-                    try
+                    foreach (var kvp in modifiedLotIds)
                     {
-                        DataRow[] rows = lotIdData.Select($"stripNo = '{stripNo}'");
-                        if (rows.Length == 0)
+                        string stripNo = kvp.Key;
+                        string newLotId = kvp.Value;
+
+                        try
+                        {
+                            DataRow[] rows = lotIdData.Select($"stripNo = '{stripNo}'");
+                            if (rows.Length == 0)
+                            {
+                                failCount++;
+                                errorLog.AppendLine($"stripNo: {stripNo} - 원본 데이터를 찾을 수 없습니다.");
+                                continue;
+                            }
+
+                            DataRow originalRow = rows[0];
+                            string oldLotId  = originalRow["lotNo"]?.ToString();
+                            string process   = originalRow["process"]?.ToString();
+
+                            DatabaseHelper.ExecuteStoredProcedureNonQuery("dbo.usp_StripMap_Process", new SqlParameter[]
+                            {
+                                new SqlParameter("@actionType",    SqlDbType.Char, 1) { Value = "L" },
+                                new SqlParameter("@stripNo",       stripNo),
+                                new SqlParameter("@process",       process),
+                                new SqlParameter("@mapArray",      DBNull.Value),
+                                new SqlParameter("@bincode",       DBNull.Value),
+                                new SqlParameter("@lotNo",         newLotId),
+                                new SqlParameter("@targetTimekey", DBNull.Value),
+                                new SqlParameter("@workerId",      currentUserId),
+                                new SqlParameter("@comment",       $"LOT ID 변경: {oldLotId} → {newLotId}"),
+                                new SqlParameter("@workerIp",      workerIp)
+                            });
+
+                            AppLogger.Info($"[{ActionTypes.LOT_UPDATE}] user={currentUserId} | stripNo={stripNo} | {oldLotId} → {newLotId}");
+                            SendMesRvMessage(stripNo, "L", ActionTypes.LOT_UPDATE);
+                            successCount++;
+                        }
+                        catch (SqlException sqlex)
                         {
                             failCount++;
-                            errorLog.AppendLine($"stripNo: {stripNo} - 원본 데이터를 찾을 수 없습니다.");
-                            continue;
+                            errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
                         }
-
-                        DataRow originalRow = rows[0];
-                        string oldLotId  = originalRow["lotNo"]?.ToString();
-                        string process   = originalRow["process"]?.ToString();
-
-                        DatabaseHelper.ExecuteStoredProcedureNonQuery("dbo.usp_StripMap_Process", new SqlParameter[]
+                        catch (Exception ex)
                         {
-                            new SqlParameter("@actionType",    SqlDbType.Char, 1) { Value = "L" },
-                            new SqlParameter("@stripNo",       stripNo),
-                            new SqlParameter("@process",       process),
-                            new SqlParameter("@mapArray",      DBNull.Value),
-                            new SqlParameter("@bincode",       DBNull.Value),
-                            new SqlParameter("@lotNo",         newLotId),
-                            new SqlParameter("@targetTimekey", DBNull.Value),
-                            new SqlParameter("@workerId",      currentUserId),
-                            new SqlParameter("@comment",       $"LOT ID 변경: {oldLotId} → {newLotId}"),
-                            new SqlParameter("@workerIp",      workerIp)
-                        });
+                            failCount++;
+                            errorLog.AppendLine($"stripNo: {stripNo} - {ex.Message}");
+                        }
+                    }
 
-                        AppLogger.Info($"[{ActionTypes.LOT_UPDATE}] user={currentUserId} | stripNo={stripNo} | {oldLotId} → {newLotId}");
-                        SendMesRvMessage(stripNo, "L", ActionTypes.LOT_UPDATE);
-                        successCount++;
-                    }
-                    catch (SqlException sqlex)
-                    {
-                        failCount++;
-                        errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
-                    }
-                    catch (Exception ex)
-                    {
-                        failCount++;
-                        errorLog.AppendLine($"stripNo: {stripNo} - {ex.Message}");
-                    }
-                }
+                    return (successCount, failCount, errorLog: errorLog.ToString());
+                });
 
-                AppLogger.Info($"[{ActionTypes.LOT_UPDATE}_RESULT] user={currentUserId} | 성공={successCount} 실패={failCount}");
-                string resultMessage = $"성공: {successCount}건\n실패: {failCount}건";
-                if (errorLog.Length > 0)
-                    resultMessage += $"\n\n오류 내역:\n{errorLog}";
+                AppLogger.Info($"[{ActionTypes.LOT_UPDATE}_RESULT] user={currentUserId} | 성공={result.successCount} 실패={result.failCount}");
+                string resultMessage = $"성공: {result.successCount}건\n실패: {result.failCount}건";
+                if (!string.IsNullOrEmpty(result.errorLog))
+                    resultMessage += $"\n\n오류 내역:\n{result.errorLog}";
 
                 MessageBox.Show(resultMessage, "저장 결과",
                     MessageBoxButtons.OK,
-                    failCount > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+                    result.failCount > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
 
-                if (successCount > 0)
+                if (result.successCount > 0)
                 {
                     modifiedLotIds.Clear();
-                    BtnSearch2_Click(null, null);
+                    await LoadLotIdDataAsync(searchLotNo, searchStripNo, searchMgzRf);
                 }
             }
             catch (Exception ex)
@@ -752,10 +769,11 @@ namespace stripMap_Editor.Forms
         /// <summary>
         /// 조회 버튼 클릭 (MapArray 변경 탭)
         /// </summary>
-        private void BtnSearchMapArray_Click(object sender, EventArgs e)
+        private async void BtnSearchMapArray_Click(object sender, EventArgs e)
         {
             try
             {
+                btnSearch_MapArray.Enabled = false;
                 string stripNo = textBox_PCB_MapArray.Text.Trim();
 
                 // 검색 조건 체크 복원 - MapArray 탭만 필수
@@ -766,16 +784,20 @@ namespace stripMap_Editor.Forms
                     return;
                 }
 
-                LoadMapArrayData(stripNo);
+                await LoadMapArrayDataAsync(stripNo);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"조회 중 오류 발생: {ex.Message}", "오류",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            finally
+            {
+                btnSearch_MapArray.Enabled = true;
+            }
         }
 
-        private void LoadMapArrayData(string stripNo)
+        private async Task LoadMapArrayDataAsync(string stripNo)
         {
             try
             {
@@ -798,12 +820,13 @@ namespace stripMap_Editor.Forms
                 AND stripNo LIKE @StripNo
             ORDER BY createdTime DESC");
 
+                string query = queryBuilder.ToString();
                 SqlParameter[] parameters = new SqlParameter[]
                 {
-            new SqlParameter("@StripNo", $"%{stripNo}%")
+                    new SqlParameter("@StripNo", $"%{stripNo}%")
                 };
 
-                DataTable dt = DatabaseHelper.ExecuteQuery(queryBuilder.ToString(), parameters);
+                DataTable dt = await Task.Run(() => DatabaseHelper.ExecuteQuery(query, parameters));
                 mapArrayData = dt.Copy();
                 DisplayMapArrayData(dt);
 
@@ -1051,7 +1074,7 @@ namespace stripMap_Editor.Forms
         /// <summary>
         /// 삭제 버튼 클릭
         /// </summary>
-        private void BtnDeleteMapArray_Click(object sender, EventArgs e)
+        private async void BtnDeleteMapArray_Click(object sender, EventArgs e)
         {
             if (!HasPermission(UserPermissions.STRIP_DELETE))
             {
@@ -1126,8 +1149,8 @@ namespace stripMap_Editor.Forms
                     }
                 }
 
-                this.Cursor = Cursors.WaitCursor;
-                DeleteMapArrayData(checkedItems, deleteComment);
+                btnDelete_MapArray.Enabled = false;
+                await DeleteMapArrayDataAsync(checkedItems, deleteComment);
             }
             catch (Exception ex)
             {
@@ -1136,7 +1159,7 @@ namespace stripMap_Editor.Forms
             }
             finally
             {
-                this.Cursor = Cursors.Default;
+                btnDelete_MapArray.Enabled = true;
             }
         }
 
@@ -1145,67 +1168,74 @@ namespace stripMap_Editor.Forms
         /// SP 동작: history 기록 + tblStripMap active=0 설정 (논리 삭제)
         /// 이후 물리 삭제(Purge)는 SP 'P'로 별도 처리
         /// </summary>
-        private void DeleteMapArrayData(List<ListViewItem> checkedItems, string comment)
+        private async Task DeleteMapArrayDataAsync(List<ListViewItem> checkedItems, string comment)
         {
-            int successCount = 0;
-            int failCount = 0;
-            StringBuilder errorLog = new StringBuilder();
             string workerIp = GetLocalIPAddress();
+            string searchStripNo = textBox_PCB_MapArray.Text.Trim();
 
             try
             {
-                foreach (ListViewItem item in checkedItems)
+                var result = await Task.Run(() =>
                 {
-                    string stripNo = string.Empty;
-                    DataRow row = item.Tag as DataRow;
-                    if (row == null) { failCount++; continue; }
+                    int successCount = 0;
+                    int failCount = 0;
+                    StringBuilder errorLog = new StringBuilder();
 
-                    try
+                    foreach (ListViewItem item in checkedItems)
                     {
-                        stripNo = row["stripNo"]?.ToString();
-                        string process = row["process"]?.ToString();
+                        string stripNo = string.Empty;
+                        DataRow row = item.Tag as DataRow;
+                        if (row == null) { failCount++; continue; }
 
-                        DatabaseHelper.ExecuteStoredProcedureNonQuery("dbo.usp_StripMap_Process", new SqlParameter[]
+                        try
                         {
-                            new SqlParameter("@actionType",    SqlDbType.Char, 1) { Value = "D" },
-                            new SqlParameter("@stripNo",       stripNo),
-                            new SqlParameter("@process",       process),
-                            new SqlParameter("@mapArray",      DBNull.Value),
-                            new SqlParameter("@bincode",       DBNull.Value),
-                            new SqlParameter("@lotNo",         DBNull.Value),
-                            new SqlParameter("@targetTimekey", DBNull.Value),
-                            new SqlParameter("@workerId",      currentUserId),
-                            new SqlParameter("@comment",       $"Strip 삭제 (논리 삭제: active=0) | 사유: {comment}"),
-                            new SqlParameter("@workerIp",      workerIp)
-                        });
+                            stripNo = row["stripNo"]?.ToString();
+                            string process = row["process"]?.ToString();
 
-                        AppLogger.Info($"[{ActionTypes.STRIP_DELETE}] user={currentUserId} | stripNo={stripNo} | 사유={comment}");
-                        SendMesRvMessage(stripNo, "D", ActionTypes.STRIP_DELETE);
-                        successCount++;
-                    }
-                    catch (SqlException sqlex)
-                    {
-                        failCount++;
-                        errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
-                    }
-                    catch (Exception ex)
-                    {
-                        failCount++;
-                        errorLog.AppendLine($"stripNo: {stripNo} - {ex.Message}");
-                    }
-                }
+                            DatabaseHelper.ExecuteStoredProcedureNonQuery("dbo.usp_StripMap_Process", new SqlParameter[]
+                            {
+                                new SqlParameter("@actionType",    SqlDbType.Char, 1) { Value = "D" },
+                                new SqlParameter("@stripNo",       stripNo),
+                                new SqlParameter("@process",       process),
+                                new SqlParameter("@mapArray",      DBNull.Value),
+                                new SqlParameter("@bincode",       DBNull.Value),
+                                new SqlParameter("@lotNo",         DBNull.Value),
+                                new SqlParameter("@targetTimekey", DBNull.Value),
+                                new SqlParameter("@workerId",      currentUserId),
+                                new SqlParameter("@comment",       $"Strip 삭제 (논리 삭제: active=0) | 사유: {comment}"),
+                                new SqlParameter("@workerIp",      workerIp)
+                            });
 
-                AppLogger.Info($"[{ActionTypes.STRIP_DELETE}_RESULT] user={currentUserId} | 성공={successCount} 실패={failCount}");
-                string resultMessage = $"성공: {successCount}건\n실패: {failCount}건";
-                if (errorLog.Length > 0)
-                    resultMessage += $"\n\n오류 내역:\n{errorLog}";
+                            AppLogger.Info($"[{ActionTypes.STRIP_DELETE}] user={currentUserId} | stripNo={stripNo} | 사유={comment}");
+                            SendMesRvMessage(stripNo, "D", ActionTypes.STRIP_DELETE);
+                            successCount++;
+                        }
+                        catch (SqlException sqlex)
+                        {
+                            failCount++;
+                            errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
+                        }
+                        catch (Exception ex)
+                        {
+                            failCount++;
+                            errorLog.AppendLine($"stripNo: {stripNo} - {ex.Message}");
+                        }
+                    }
+
+                    return (successCount, failCount, errorLog: errorLog.ToString());
+                });
+
+                AppLogger.Info($"[{ActionTypes.STRIP_DELETE}_RESULT] user={currentUserId} | 성공={result.successCount} 실패={result.failCount}");
+                string resultMessage = $"성공: {result.successCount}건\n실패: {result.failCount}건";
+                if (!string.IsNullOrEmpty(result.errorLog))
+                    resultMessage += $"\n\n오류 내역:\n{result.errorLog}";
 
                 MessageBox.Show(resultMessage, "삭제 결과",
                     MessageBoxButtons.OK,
-                    failCount > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+                    result.failCount > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
 
-                if (successCount > 0)
-                    BtnSearchMapArray_Click(null, null);
+                if (result.successCount > 0)
+                    await LoadMapArrayDataAsync(searchStripNo);
             }
             catch (Exception ex)
             {
@@ -1217,7 +1247,7 @@ namespace stripMap_Editor.Forms
         /// <summary>
         /// 수정 버튼 클릭
         /// </summary>
-        private void BtnUpdateMapArray_Click(object sender, EventArgs e)
+        private async void BtnUpdateMapArray_Click(object sender, EventArgs e)
         {
             try
             {
@@ -1295,7 +1325,7 @@ namespace stripMap_Editor.Forms
 
                 if (result == DialogResult.Yes)
                 {
-                    this.Cursor = Cursors.WaitCursor;
+                    btnUpdate_MapArray.Enabled = false;
                     int colCnt = 0;
                     if (checkedItems.Count > 0)
                     {
@@ -1304,7 +1334,7 @@ namespace stripMap_Editor.Forms
                             && firstRow["colCnt"] != DBNull.Value)
                             colCnt = Convert.ToInt32(firstRow["colCnt"]);
                     }
-                    UpdateMapArrayData(checkedItems, newMapArray, newBinCode, colCnt);
+                    await UpdateMapArrayDataAsync(checkedItems, newMapArray, newBinCode, colCnt);
                 }
             }
             catch (Exception ex)
@@ -1314,7 +1344,7 @@ namespace stripMap_Editor.Forms
             }
             finally
             {
-                this.Cursor = Cursors.Default;
+                btnUpdate_MapArray.Enabled = true;
             }
         }
 
@@ -1322,86 +1352,93 @@ namespace stripMap_Editor.Forms
         /// MapArray 수정 — SP 'U' (usp_StripMap_Process)
         /// SP의 COALESCE(@mapArray, mapArray) 처리: 빈 값이면 NULL 전달 → 기존 값 유지
         /// </summary>
-        private void UpdateMapArrayData(List<ListViewItem> checkedItems, string newMapArray, string newBinCode, int colCnt)
+        private async Task UpdateMapArrayDataAsync(List<ListViewItem> checkedItems, string newMapArray, string newBinCode, int colCnt)
         {
-            int successCount = 0;
-            int failCount = 0;
-            StringBuilder errorLog = new StringBuilder();
             string workerIp = GetLocalIPAddress();
+            string searchStripNo = textBox_PCB_MapArray.Text.Trim();
 
             try
             {
-                foreach (ListViewItem item in checkedItems)
+                var result = await Task.Run(() =>
                 {
-                    string stripNo = string.Empty;
-                    DataRow row = item.Tag as DataRow;
-                    if (row == null) { failCount++; continue; }
+                    int successCount = 0;
+                    int failCount = 0;
+                    StringBuilder errorLog = new StringBuilder();
 
-                    try
+                    foreach (ListViewItem item in checkedItems)
                     {
-                        stripNo  = row["stripNo"]?.ToString();
-                        string process = row["process"]?.ToString();
+                        string stripNo = string.Empty;
+                        DataRow row = item.Tag as DataRow;
+                        if (row == null) { failCount++; continue; }
 
-                        // 빈 값이면 NULL → SP의 COALESCE가 기존 DB 값 유지
-                        object mapArrayParam = string.IsNullOrEmpty(newMapArray) ? (object)DBNull.Value : newMapArray;
-                        object bincodeParam  = string.IsNullOrEmpty(newBinCode)  ? (object)DBNull.Value : newBinCode;
-
-                        // 변경 좌표 계산
-                        string origMapArray = row["mapArray"]?.ToString() ?? "";
-                        (List<int> xList, List<int> yList) changedCoords = (new List<int>(), new List<int>());
-                        if (!string.IsNullOrEmpty(newMapArray) && colCnt > 0)
-                            changedCoords = CalcChangedCoords(origMapArray, newMapArray, colCnt);
-
-                        string xposList = changedCoords.xList.Count > 0
-                            ? string.Join(",", changedCoords.xList) : null;
-                        string yposList = changedCoords.yList.Count > 0
-                            ? string.Join(",", changedCoords.yList) : null;
-
-                        DatabaseHelper.ExecuteStoredProcedureNonQuery("dbo.usp_StripMap_Process", new SqlParameter[]
+                        try
                         {
-                            new SqlParameter("@actionType",    SqlDbType.Char, 1) { Value = "U" },
-                            new SqlParameter("@stripNo",       stripNo),
-                            new SqlParameter("@process",       process),
-                            new SqlParameter("@mapArray",      mapArrayParam),
-                            new SqlParameter("@bincode",       bincodeParam),
-                            new SqlParameter("@lotNo",         DBNull.Value),
-                            new SqlParameter("@targetTimekey", DBNull.Value),
-                            new SqlParameter("@workerId",      currentUserId),
-                            new SqlParameter("@comment",       "MapArray/BinCode 수정"),
-                            new SqlParameter("@workerIp",      workerIp),
-                            new SqlParameter("@changedXpos",   (object)xposList ?? DBNull.Value),
-                            new SqlParameter("@changedYpos",   (object)yposList ?? DBNull.Value)
-                        });
+                            stripNo  = row["stripNo"]?.ToString();
+                            string process = row["process"]?.ToString();
 
-                        AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}] user={currentUserId} | stripNo={stripNo} | mapArray={newMapArray} binCode={newBinCode}");
-                        for (int i = 0; i < changedCoords.xList.Count; i++)
-                            SendMesRvMessage(stripNo, "U", ActionTypes.STRIP_UPDATE,
-                                             changedCoords.xList[i], changedCoords.yList[i]);
-                        successCount++;
-                    }
-                    catch (SqlException sqlex)
-                    {
-                        failCount++;
-                        errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
-                    }
-                    catch (Exception ex)
-                    {
-                        failCount++;
-                        errorLog.AppendLine($"stripNo: {stripNo} - {ex.Message}");
-                    }
-                }
+                            // 빈 값이면 NULL → SP의 COALESCE가 기존 DB 값 유지
+                            object mapArrayParam = string.IsNullOrEmpty(newMapArray) ? (object)DBNull.Value : newMapArray;
+                            object bincodeParam  = string.IsNullOrEmpty(newBinCode)  ? (object)DBNull.Value : newBinCode;
 
-                AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}_RESULT] user={currentUserId} | 성공={successCount} 실패={failCount}");
-                string resultMessage = $"성공: {successCount}건\n실패: {failCount}건";
-                if (errorLog.Length > 0)
-                    resultMessage += $"\n\n오류 내역:\n{errorLog}";
+                            // 변경 좌표 계산
+                            string origMapArray = row["mapArray"]?.ToString() ?? "";
+                            (List<int> xList, List<int> yList) changedCoords = (new List<int>(), new List<int>());
+                            if (!string.IsNullOrEmpty(newMapArray) && colCnt > 0)
+                                changedCoords = CalcChangedCoords(origMapArray, newMapArray, colCnt);
+
+                            string xposList = changedCoords.xList.Count > 0
+                                ? string.Join(",", changedCoords.xList) : null;
+                            string yposList = changedCoords.yList.Count > 0
+                                ? string.Join(",", changedCoords.yList) : null;
+
+                            DatabaseHelper.ExecuteStoredProcedureNonQuery("dbo.usp_StripMap_Process", new SqlParameter[]
+                            {
+                                new SqlParameter("@actionType",    SqlDbType.Char, 1) { Value = "U" },
+                                new SqlParameter("@stripNo",       stripNo),
+                                new SqlParameter("@process",       process),
+                                new SqlParameter("@mapArray",      mapArrayParam),
+                                new SqlParameter("@bincode",       bincodeParam),
+                                new SqlParameter("@lotNo",         DBNull.Value),
+                                new SqlParameter("@targetTimekey", DBNull.Value),
+                                new SqlParameter("@workerId",      currentUserId),
+                                new SqlParameter("@comment",       "MapArray/BinCode 수정"),
+                                new SqlParameter("@workerIp",      workerIp),
+                                new SqlParameter("@changedXpos",   (object)xposList ?? DBNull.Value),
+                                new SqlParameter("@changedYpos",   (object)yposList ?? DBNull.Value)
+                            });
+
+                            AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}] user={currentUserId} | stripNo={stripNo} | mapArray={newMapArray} binCode={newBinCode}");
+                            for (int i = 0; i < changedCoords.xList.Count; i++)
+                                SendMesRvMessage(stripNo, "U", ActionTypes.STRIP_UPDATE,
+                                                 changedCoords.xList[i], changedCoords.yList[i]);
+                            successCount++;
+                        }
+                        catch (SqlException sqlex)
+                        {
+                            failCount++;
+                            errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
+                        }
+                        catch (Exception ex)
+                        {
+                            failCount++;
+                            errorLog.AppendLine($"stripNo: {stripNo} - {ex.Message}");
+                        }
+                    }
+
+                    return (successCount, failCount, errorLog: errorLog.ToString());
+                });
+
+                AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}_RESULT] user={currentUserId} | 성공={result.successCount} 실패={result.failCount}");
+                string resultMessage = $"성공: {result.successCount}건\n실패: {result.failCount}건";
+                if (!string.IsNullOrEmpty(result.errorLog))
+                    resultMessage += $"\n\n오류 내역:\n{result.errorLog}";
 
                 MessageBox.Show(resultMessage, "수정 결과",
                     MessageBoxButtons.OK,
-                    failCount > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+                    result.failCount > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
 
-                if (successCount > 0)
-                    BtnSearchMapArray_Click(null, null);
+                if (result.successCount > 0)
+                    await LoadMapArrayDataAsync(searchStripNo);
             }
             catch (Exception ex)
             {
@@ -1456,10 +1493,11 @@ namespace stripMap_Editor.Forms
         /// <summary>
         /// 조회 버튼 클릭 (PCB 원복 탭) - tblStripMapHistory 조회
         /// </summary>
-        private void BtnSearch_Click(object sender, EventArgs e)
+        private async void BtnSearch_Click(object sender, EventArgs e)
         {
             try
             {
+                btnSearch_PCB.Enabled = false;
                 string lotNo = textBox_LOT.Text.Trim();
                 string stripNo = textBox_PCB.Text.Trim();
                 string mgzRf = textBox_MGZ.Text.Trim();
@@ -1467,16 +1505,20 @@ namespace stripMap_Editor.Forms
                 // 검색 조건 체크 제거 - 빈 값이어도 전체 조회
                 _periodOffset = 0;
                 var (start, end) = GetPeriodRange(_periodOffset);
-                LoadHistoryData(lotNo, stripNo, mgzRf, start, end);
+                await LoadHistoryDataAsync(lotNo, stripNo, mgzRf, start, end);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"조회 중 오류 발생: {ex.Message}", "오류",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            finally
+            {
+                btnSearch_PCB.Enabled = true;
+            }
         }
 
-        private void LoadHistoryData(string lotNo, string stripNo, string mgzRf,
+        private async Task LoadHistoryDataAsync(string lotNo, string stripNo, string mgzRf,
                                      DateTime startDate, DateTime endDate)
         {
             try
@@ -1528,7 +1570,9 @@ namespace stripMap_Editor.Forms
 
                 queryBuilder.Append(" ORDER BY timekey DESC");
 
-                DataTable dt = DatabaseHelper.ExecuteQuery(queryBuilder.ToString(), parameters.ToArray());
+                string query = queryBuilder.ToString();
+                SqlParameter[] paramArray = parameters.ToArray();
+                DataTable dt = await Task.Run(() => DatabaseHelper.ExecuteQuery(query, paramArray));
                 originalData = dt.Copy();
                 DisplayHistoryData(dt);
 
@@ -1607,7 +1651,7 @@ namespace stripMap_Editor.Forms
             listViewResult_PCB.EndUpdate();
         }
 
-        private void BtnRestore_Click(object sender, EventArgs e)
+        private async void BtnRestore_Click(object sender, EventArgs e)
         {
             // ① 권한 체크 (가장 먼저)
             if (!HasPermission(UserPermissions.STRIP_ROLLBACK))
@@ -1668,25 +1712,30 @@ namespace stripMap_Editor.Forms
                     return;
                 }
 
-                // ④ 선택 이력 이후 수정 이력 존재 시 경고
-                var stripsWithPostChanges = new List<string>();
-                foreach (ListViewItem warnItem in checkedItems)
+                // ④ 선택 이력 이후 수정 이력 존재 시 경고 — 사전 검증 DB 쿼리도 비동기
+                var checkItems = checkedItems.Select(item =>
                 {
-                    DataRow warnRow = warnItem.Tag as DataRow;
-                    if (warnRow == null) continue;
-                    string sNo = warnRow["stripNo"]?.ToString() ?? "";
-                    string tk  = warnRow["timekey"]?.ToString()  ?? "";
-                    if (string.IsNullOrEmpty(sNo) || string.IsNullOrEmpty(tk)) continue;
+                    DataRow warnRow = item.Tag as DataRow;
+                    if (warnRow == null) return (sNo: "", tk: "");
+                    return (sNo: warnRow["stripNo"]?.ToString() ?? "", tk: warnRow["timekey"]?.ToString() ?? "");
+                }).Where(x => !string.IsNullOrEmpty(x.sNo) && !string.IsNullOrEmpty(x.tk)).ToList();
 
-                    DataTable dtChk = DatabaseHelper.ExecuteQuery(
-                        "SELECT TOP 1 1 AS chk FROM dbo.tblStripMapHistory WHERE stripNo = @sn AND timekey > @tk",
-                        new SqlParameter[] {
-                            new SqlParameter("@sn", sNo),
-                            new SqlParameter("@tk", tk)
-                        });
-                    if (dtChk.Rows.Count > 0)
-                        stripsWithPostChanges.Add(sNo);
-                }
+                var stripsWithPostChanges = await Task.Run(() =>
+                {
+                    var result = new List<string>();
+                    foreach (var (sNo, tk) in checkItems)
+                    {
+                        DataTable dtChk = DatabaseHelper.ExecuteQuery(
+                            "SELECT TOP 1 1 AS chk FROM dbo.tblStripMapHistory WHERE stripNo = @sn AND timekey > @tk",
+                            new SqlParameter[] {
+                                new SqlParameter("@sn", sNo),
+                                new SqlParameter("@tk", tk)
+                            });
+                        if (dtChk.Rows.Count > 0)
+                            result.Add(sNo);
+                    }
+                    return result;
+                });
 
                 if (stripsWithPostChanges.Count > 0)
                 {
@@ -1701,16 +1750,16 @@ namespace stripMap_Editor.Forms
                     if (warnResult != DialogResult.Yes) return;
                 }
 
-                DialogResult result = MessageBox.Show(
+                DialogResult result2 = MessageBox.Show(
                     $"{checkedItems.Count}건의 데이터를 원복하시겠습니까?\n\n선택한 버전으로 데이터를 되돌립니다.",
                     "원복 확인",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);
 
-                if (result == DialogResult.Yes)
+                if (result2 == DialogResult.Yes)
                 {
-                    this.Cursor = Cursors.WaitCursor;
-                    RestoreFromHistory(checkedItems);
+                    btnRestore_PCB.Enabled = false;
+                    await RestoreFromHistoryAsync(checkedItems);
                 }
             }
             catch (Exception ex)
@@ -1720,7 +1769,7 @@ namespace stripMap_Editor.Forms
             }
             finally
             {
-                this.Cursor = Cursors.Default;
+                btnRestore_PCB.Enabled = true;
             }
         }
 
@@ -1729,7 +1778,7 @@ namespace stripMap_Editor.Forms
         /// 대상: actionType = 'PURGE' 인 이력 레코드만 선택 가능
         /// 권한: STRIP_PURGE_ROLLBACK (Admin 이상)
         /// </summary>
-        private void BtnPurgeRollback_Click(object sender, EventArgs e)
+        private async void BtnPurgeRollback_Click(object sender, EventArgs e)
         {
             // ① 권한 체크 (가장 먼저 — Admin 이상)
             if (!HasPermission(UserPermissions.STRIP_PURGE_ROLLBACK))
@@ -1794,25 +1843,30 @@ namespace stripMap_Editor.Forms
                     return;
                 }
 
-                // ④ Purge 이후 수정 이력 존재 시 경고 (STRIP_PURGE 제외 — 동시 복원 대상 오탐 방지)
-                var stripsWithPostChanges = new List<string>();
-                foreach (ListViewItem warnItem in checkedItems)
+                // ④ Purge 이후 수정 이력 존재 시 경고 — 사전 검증 DB 쿼리도 비동기
+                var checkItems = checkedItems.Select(item =>
                 {
-                    DataRow warnRow = warnItem.Tag as DataRow;
-                    if (warnRow == null) continue;
-                    string sNo = warnRow["stripNo"]?.ToString() ?? "";
-                    string tk  = warnRow["timekey"]?.ToString()  ?? "";
-                    if (string.IsNullOrEmpty(sNo) || string.IsNullOrEmpty(tk)) continue;
+                    DataRow warnRow = item.Tag as DataRow;
+                    if (warnRow == null) return (sNo: "", tk: "");
+                    return (sNo: warnRow["stripNo"]?.ToString() ?? "", tk: warnRow["timekey"]?.ToString() ?? "");
+                }).Where(x => !string.IsNullOrEmpty(x.sNo) && !string.IsNullOrEmpty(x.tk)).ToList();
 
-                    DataTable dtChk = DatabaseHelper.ExecuteQuery(
-                        "SELECT TOP 1 1 AS chk FROM dbo.tblStripMapHistory WHERE stripNo = @sn AND timekey > @tk AND actionType <> 'STRIP_PURGE'",
-                        new SqlParameter[] {
-                            new SqlParameter("@sn", sNo),
-                            new SqlParameter("@tk", tk)
-                        });
-                    if (dtChk.Rows.Count > 0)
-                        stripsWithPostChanges.Add(sNo);
-                }
+                var stripsWithPostChanges = await Task.Run(() =>
+                {
+                    var resultList = new List<string>();
+                    foreach (var (sNo, tk) in checkItems)
+                    {
+                        DataTable dtChk = DatabaseHelper.ExecuteQuery(
+                            "SELECT TOP 1 1 AS chk FROM dbo.tblStripMapHistory WHERE stripNo = @sn AND timekey > @tk AND actionType <> 'STRIP_PURGE'",
+                            new SqlParameter[] {
+                                new SqlParameter("@sn", sNo),
+                                new SqlParameter("@tk", tk)
+                            });
+                        if (dtChk.Rows.Count > 0)
+                            resultList.Add(sNo);
+                    }
+                    return resultList;
+                });
 
                 if (stripsWithPostChanges.Count > 0)
                 {
@@ -1837,8 +1891,8 @@ namespace stripMap_Editor.Forms
 
                 if (result == DialogResult.Yes)
                 {
-                    this.Cursor = Cursors.WaitCursor;
-                    PurgeRollbackData(checkedItems);
+                    btnPurgeRollback_PCB.Enabled = false;
+                    await PurgeRollbackDataAsync(checkedItems);
                 }
             }
             catch (Exception ex)
@@ -1848,74 +1902,86 @@ namespace stripMap_Editor.Forms
             }
             finally
             {
-                this.Cursor = Cursors.Default;
+                btnPurgeRollback_PCB.Enabled = true;
             }
         }
 
         /// <summary>
         /// PURGE 이력 복원 — SP 'Q' (usp_StripMap_Process)
         /// </summary>
-        private void PurgeRollbackData(List<ListViewItem> checkedItems)
+        private async Task PurgeRollbackDataAsync(List<ListViewItem> checkedItems)
         {
-            int successCount = 0;
-            int failCount = 0;
-            StringBuilder errorLog = new StringBuilder();
             string workerIp = GetLocalIPAddress();
+            string searchLotNo = textBox_LOT.Text.Trim();
+            string searchStripNo = textBox_PCB.Text.Trim();
+            string searchMgzRf = textBox_MGZ.Text.Trim();
 
             try
             {
-                foreach (ListViewItem item in checkedItems)
+                var result = await Task.Run(() =>
                 {
-                    DataRow row = item.Tag as DataRow;
-                    if (row == null) { failCount++; continue; }
+                    int successCount = 0;
+                    int failCount = 0;
+                    StringBuilder errorLog = new StringBuilder();
 
-                    string stripNo = string.Empty;
-                    try
+                    foreach (ListViewItem item in checkedItems)
                     {
-                        stripNo  = row["stripNo"]?.ToString();
-                        string process       = row["process"]?.ToString();
-                        string targetTimekey = row["timekey"]?.ToString();  // PURGE 이력 레코드 식별키
+                        DataRow row = item.Tag as DataRow;
+                        if (row == null) { failCount++; continue; }
 
-                        DatabaseHelper.ExecuteStoredProcedureNonQuery("dbo.usp_StripMap_Process", new SqlParameter[]
+                        string stripNo = string.Empty;
+                        try
                         {
-                            new SqlParameter("@actionType",     SqlDbType.Char, 1) { Value = "Q" },
-                            new SqlParameter("@stripNo",        stripNo),
-                            new SqlParameter("@process",        process),
-                            new SqlParameter("@mapArray",       DBNull.Value),
-                            new SqlParameter("@bincode",        DBNull.Value),
-                            new SqlParameter("@lotNo",          DBNull.Value),
-                            new SqlParameter("@targetTimekey",  SqlDbType.VarChar, 20) { Value = targetTimekey },
-                            new SqlParameter("@workerId",       currentUserId),
-                            new SqlParameter("@comment",        $"Purge 이력 복원 (timekey: {targetTimekey})"),
-                            new SqlParameter("@workerIp",       workerIp)
-                        });
+                            stripNo  = row["stripNo"]?.ToString();
+                            string process       = row["process"]?.ToString();
+                            string targetTimekey = row["timekey"]?.ToString();
 
-                        AppLogger.Info($"[{ActionTypes.STRIP_PURGE_ROLLBACK}] user={currentUserId} | stripNo={stripNo} | timekey={targetTimekey}");
-                        successCount++;
-                    }
-                    catch (SqlException sqlex)
-                    {
-                        failCount++;
-                        errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
-                    }
-                    catch (Exception ex)
-                    {
-                        failCount++;
-                        errorLog.AppendLine($"stripNo: {stripNo} - {ex.Message}");
-                    }
-                }
+                            DatabaseHelper.ExecuteStoredProcedureNonQuery("dbo.usp_StripMap_Process", new SqlParameter[]
+                            {
+                                new SqlParameter("@actionType",     SqlDbType.Char, 1) { Value = "Q" },
+                                new SqlParameter("@stripNo",        stripNo),
+                                new SqlParameter("@process",        process),
+                                new SqlParameter("@mapArray",       DBNull.Value),
+                                new SqlParameter("@bincode",        DBNull.Value),
+                                new SqlParameter("@lotNo",          DBNull.Value),
+                                new SqlParameter("@targetTimekey",  SqlDbType.VarChar, 20) { Value = targetTimekey },
+                                new SqlParameter("@workerId",       currentUserId),
+                                new SqlParameter("@comment",        $"Purge 이력 복원 (timekey: {targetTimekey})"),
+                                new SqlParameter("@workerIp",       workerIp)
+                            });
 
-                AppLogger.Info($"[{ActionTypes.STRIP_PURGE_ROLLBACK}_RESULT] user={currentUserId} | 성공={successCount} 실패={failCount}");
-                string resultMessage = $"성공: {successCount}건\n실패: {failCount}건";
-                if (errorLog.Length > 0)
-                    resultMessage += $"\n\n오류 내역:\n{errorLog}";
+                            AppLogger.Info($"[{ActionTypes.STRIP_PURGE_ROLLBACK}] user={currentUserId} | stripNo={stripNo} | timekey={targetTimekey}");
+                            successCount++;
+                        }
+                        catch (SqlException sqlex)
+                        {
+                            failCount++;
+                            errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
+                        }
+                        catch (Exception ex)
+                        {
+                            failCount++;
+                            errorLog.AppendLine($"stripNo: {stripNo} - {ex.Message}");
+                        }
+                    }
+
+                    return (successCount, failCount, errorLog: errorLog.ToString());
+                });
+
+                AppLogger.Info($"[{ActionTypes.STRIP_PURGE_ROLLBACK}_RESULT] user={currentUserId} | 성공={result.successCount} 실패={result.failCount}");
+                string resultMessage = $"성공: {result.successCount}건\n실패: {result.failCount}건";
+                if (!string.IsNullOrEmpty(result.errorLog))
+                    resultMessage += $"\n\n오류 내역:\n{result.errorLog}";
 
                 MessageBox.Show(resultMessage, "Purge 복원 결과",
                     MessageBoxButtons.OK,
-                    failCount > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+                    result.failCount > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
 
-                if (successCount > 0)
-                    BtnSearch_Click(null, null);
+                if (result.successCount > 0)
+                {
+                    var (start, end) = GetPeriodRange(_periodOffset);
+                    await LoadHistoryDataAsync(searchLotNo, searchStripNo, searchMgzRf, start, end);
+                }
             }
             catch (Exception ex)
             {
@@ -1941,87 +2007,98 @@ namespace stripMap_Editor.Forms
         /// tblStripMapHistory 이력으로부터 원복 — SP 'R' 전용 (일반 이력만)
         /// STRIP_PURGE 이력은 이 경로로 처리 불가 — BtnPurgeRollback_Click(SP 'Q') 전용
         /// </summary>
-        private void RestoreFromHistory(List<ListViewItem> checkedItems)
+        private async Task RestoreFromHistoryAsync(List<ListViewItem> checkedItems)
         {
+            string workerIp = GetLocalIPAddress();
+            bool hasRollbackPerm = HasPermission(UserPermissions.STRIP_ROLLBACK);
+            string searchLotNo = textBox_LOT.Text.Trim();
+            string searchStripNo = textBox_PCB.Text.Trim();
+            string searchMgzRf = textBox_MGZ.Text.Trim();
+
             try
             {
-                int successCount = 0;
-                int failCount = 0;
-                StringBuilder errorLog = new StringBuilder();
-                string workerIp = GetLocalIPAddress();
-
-                foreach (ListViewItem item in checkedItems)
+                var result = await Task.Run(() =>
                 {
-                    string stripNo = string.Empty;
-                    DataRow row = item.Tag as DataRow;
-                    if (row == null) { failCount++; continue; }
+                    int successCount = 0;
+                    int failCount = 0;
+                    StringBuilder errorLog = new StringBuilder();
 
-                    try
+                    foreach (ListViewItem item in checkedItems)
                     {
-                        stripNo = row["stripNo"]?.ToString();
-                        string process = row["process"]?.ToString();
-                        string targetTimekey = row["timekey"]?.ToString();   // 이력 레코드 식별키
-                        string actionType = row["actionType"] != DBNull.Value ? row["actionType"].ToString() : string.Empty;
+                        string stripNo = string.Empty;
+                        DataRow row = item.Tag as DataRow;
+                        if (row == null) { failCount++; continue; }
 
-                        // STRIP_PURGE 이력은 원복 버튼 경로로 처리 불가 (Purge복원 버튼 전용)
-                        if (actionType == ActionTypes.STRIP_PURGE)
+                        try
+                        {
+                            stripNo = row["stripNo"]?.ToString();
+                            string process = row["process"]?.ToString();
+                            string targetTimekey = row["timekey"]?.ToString();
+                            string actionType = row["actionType"] != DBNull.Value ? row["actionType"].ToString() : string.Empty;
+
+                            if (actionType == ActionTypes.STRIP_PURGE)
+                            {
+                                failCount++;
+                                errorLog.AppendLine($"stripNo: {stripNo} - STRIP_PURGE 이력은 'Purge복원' 버튼을 사용하세요.");
+                                continue;
+                            }
+
+                            if (!hasRollbackPerm)
+                            {
+                                failCount++;
+                                errorLog.AppendLine($"stripNo: {stripNo} - 원복 권한이 없습니다.");
+                                continue;
+                            }
+
+                            string comment = $"이력 원복 (timekey: {targetTimekey})";
+
+                            DatabaseHelper.ExecuteStoredProcedureNonQuery("dbo.usp_StripMap_Process", new SqlParameter[]
+                            {
+                                new SqlParameter("@actionType",    SqlDbType.Char, 1) { Value = "R" },
+                                new SqlParameter("@stripNo",       stripNo),
+                                new SqlParameter("@process",       process),
+                                new SqlParameter("@mapArray",      DBNull.Value),
+                                new SqlParameter("@bincode",       DBNull.Value),
+                                new SqlParameter("@lotNo",         DBNull.Value),
+                                new SqlParameter("@targetTimekey", SqlDbType.VarChar, 20) { Value = targetTimekey },
+                                new SqlParameter("@workerId",      currentUserId),
+                                new SqlParameter("@comment",       comment),
+                                new SqlParameter("@workerIp",      workerIp)
+                            });
+
+                            AppLogger.Info($"[{ActionTypes.STRIP_ROLLBACK}] user={currentUserId} | stripNo={stripNo} | timekey={targetTimekey}");
+                            SendMesRvMessage(stripNo, "R", ActionTypes.STRIP_ROLLBACK);
+                            successCount++;
+                        }
+                        catch (SqlException sqlex)
                         {
                             failCount++;
-                            errorLog.AppendLine($"stripNo: {stripNo} - STRIP_PURGE 이력은 'Purge복원' 버튼을 사용하세요.");
-                            continue;
+                            errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
                         }
-
-                        // 일반 원복 권한 체크
-                        if (!HasPermission(UserPermissions.STRIP_ROLLBACK))
+                        catch (Exception ex)
                         {
                             failCount++;
-                            errorLog.AppendLine($"stripNo: {stripNo} - 원복 권한이 없습니다.");
-                            continue;
+                            errorLog.AppendLine($"stripNo: {stripNo} - {ex.Message}");
                         }
-
-                        string comment = $"이력 원복 (timekey: {targetTimekey})";
-
-                        DatabaseHelper.ExecuteStoredProcedureNonQuery("dbo.usp_StripMap_Process", new SqlParameter[]
-                        {
-                            new SqlParameter("@actionType",    SqlDbType.Char, 1) { Value = "R" },
-                            new SqlParameter("@stripNo",       stripNo),
-                            new SqlParameter("@process",       process),
-                            new SqlParameter("@mapArray",      DBNull.Value),
-                            new SqlParameter("@bincode",       DBNull.Value),
-                            new SqlParameter("@lotNo",         DBNull.Value),
-                            new SqlParameter("@targetTimekey", SqlDbType.VarChar, 20) { Value = targetTimekey },
-                            new SqlParameter("@workerId",      currentUserId),
-                            new SqlParameter("@comment",       comment),
-                            new SqlParameter("@workerIp",      workerIp)
-                        });
-
-                        AppLogger.Info($"[{ActionTypes.STRIP_ROLLBACK}] user={currentUserId} | stripNo={stripNo} | timekey={targetTimekey}");
-                        SendMesRvMessage(stripNo, "R", ActionTypes.STRIP_ROLLBACK);
-                        successCount++;
                     }
-                    catch (SqlException sqlex)
-                    {
-                        failCount++;
-                        errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
-                    }
-                    catch (Exception ex)
-                    {
-                        failCount++;
-                        errorLog.AppendLine($"stripNo: {stripNo} - {ex.Message}");
-                    }
-                }
 
-                AppLogger.Info($"[{ActionTypes.STRIP_ROLLBACK}_RESULT] user={currentUserId} | 성공={successCount} 실패={failCount}");
-                string resultMessage = $"성공: {successCount}건\n실패: {failCount}건";
-                if (errorLog.Length > 0)
-                    resultMessage += $"\n\n오류 내역:\n{errorLog}";
+                    return (successCount, failCount, errorLog: errorLog.ToString());
+                });
+
+                AppLogger.Info($"[{ActionTypes.STRIP_ROLLBACK}_RESULT] user={currentUserId} | 성공={result.successCount} 실패={result.failCount}");
+                string resultMessage = $"성공: {result.successCount}건\n실패: {result.failCount}건";
+                if (!string.IsNullOrEmpty(result.errorLog))
+                    resultMessage += $"\n\n오류 내역:\n{result.errorLog}";
 
                 MessageBox.Show(resultMessage, "원복 결과",
                     MessageBoxButtons.OK,
-                    failCount > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+                    result.failCount > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
 
-                if (successCount > 0)
-                    BtnSearch_Click(null, null);
+                if (result.successCount > 0)
+                {
+                    var (start, end) = GetPeriodRange(_periodOffset);
+                    await LoadHistoryDataAsync(searchLotNo, searchStripNo, searchMgzRf, start, end);
+                }
             }
             catch (Exception ex)
             {
@@ -2030,17 +2107,17 @@ namespace stripMap_Editor.Forms
             }
         }
 
-        private void BtnPrevPeriod_Click(object sender, EventArgs e)
+        private async void BtnPrevPeriod_Click(object sender, EventArgs e)
         {
             _periodOffset++;
             var (start, end) = GetPeriodRange(_periodOffset);
             string lotNo   = textBox_LOT.Text.Trim();
             string stripNo = textBox_PCB.Text.Trim();
             string mgzRf   = textBox_MGZ.Text.Trim();
-            LoadHistoryData(lotNo, stripNo, mgzRf, start, end);
+            await LoadHistoryDataAsync(lotNo, stripNo, mgzRf, start, end);
         }
 
-        private void BtnNextPeriod_Click(object sender, EventArgs e)
+        private async void BtnNextPeriod_Click(object sender, EventArgs e)
         {
             if (_periodOffset <= 0) return;
             _periodOffset--;
@@ -2048,7 +2125,7 @@ namespace stripMap_Editor.Forms
             string lotNo   = textBox_LOT.Text.Trim();
             string stripNo = textBox_PCB.Text.Trim();
             string mgzRf   = textBox_MGZ.Text.Trim();
-            LoadHistoryData(lotNo, stripNo, mgzRf, start, end);
+            await LoadHistoryDataAsync(lotNo, stripNo, mgzRf, start, end);
         }
 
         #endregion

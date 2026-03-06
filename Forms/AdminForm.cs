@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using StripMapEditor.Database;
 using StripMapEditor.Utils;
@@ -68,7 +69,7 @@ namespace stripMap_Editor.Forms
 
         // ── 조회 ─────────────────────────────────────────────────────
 
-        private void BtnSearch_Click(object sender, EventArgs e)
+        private async void BtnSearch_Click(object sender, EventArgs e)
         {
             string stripNo = textBoxStripNo.Text.Trim();
             if (string.IsNullOrEmpty(stripNo))
@@ -77,7 +78,15 @@ namespace stripMap_Editor.Forms
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            LoadPurgeData(stripNo);
+            btnSearch.Enabled = false;
+            try
+            {
+                await LoadPurgeDataAsync(stripNo);
+            }
+            finally
+            {
+                btnSearch.Enabled = true;
+            }
         }
 
         private void TextBoxStripNo_KeyDown(object sender, KeyEventArgs e)
@@ -85,12 +94,10 @@ namespace stripMap_Editor.Forms
             if (e.KeyCode == Keys.Enter) BtnSearch_Click(sender, e);
         }
 
-        private void LoadPurgeData(string stripNo)
+        private async Task LoadPurgeDataAsync(string stripNo)
         {
             try
             {
-                this.Cursor = Cursors.WaitCursor;
-
                 // tblStripMap 전체 행 조회 (active=1, active=0 모두)
                 string query = @"
                     SELECT
@@ -104,10 +111,12 @@ namespace stripMap_Editor.Forms
                     WHERE m.stripNo LIKE @stripNo
                     ORDER BY m.stripNo ASC, m.[version] ASC";
 
-                DataTable dt = DatabaseHelper.ExecuteQuery(query, new SqlParameter[]
+                SqlParameter[] parameters = new SqlParameter[]
                 {
                     new SqlParameter("@stripNo", $"%{stripNo}%")
-                });
+                };
+
+                DataTable dt = await Task.Run(() => DatabaseHelper.ExecuteQuery(query, parameters));
 
                 _searchResult = dt.Copy();
                 DisplayPurgeData(dt);
@@ -129,10 +138,6 @@ namespace stripMap_Editor.Forms
                 labelResultTitle.Text = "조회 결과";
                 MessageBox.Show($"데이터 조회 중 오류: {ex.Message}", "오류",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                this.Cursor = Cursors.Default;
             }
         }
 
@@ -204,7 +209,7 @@ namespace stripMap_Editor.Forms
 
         // ── Purge 실행 ───────────────────────────────────────────────
 
-        private void BtnPurge_Click(object sender, EventArgs e)
+        private async void BtnPurge_Click(object sender, EventArgs e)
         {
             var checkedItems = listViewPurge.CheckedItems.Cast<ListViewItem>().ToList();
             if (checkedItems.Count == 0)
@@ -232,19 +237,28 @@ namespace stripMap_Editor.Forms
                 return;
             }
 
-            ExecutePurge(checkedItems, comment);
-        }
-
-        private void ExecutePurge(List<ListViewItem> items, string comment)
-        {
-            int successCount = 0;
-            int failCount    = 0;
-            StringBuilder errorLog = new StringBuilder();
-            string workerIp = GetLocalIPAddress();
-
-            this.Cursor = Cursors.WaitCursor;
+            btnPurge.Enabled = false;
             try
             {
+                await ExecutePurgeAsync(checkedItems, comment);
+            }
+            finally
+            {
+                btnPurge.Enabled = true;
+            }
+        }
+
+        private async Task ExecutePurgeAsync(List<ListViewItem> items, string comment)
+        {
+            string workerIp = GetLocalIPAddress();
+            string searchStripNo = textBoxStripNo.Text.Trim();
+
+            var result = await Task.Run(() =>
+            {
+                int successCount = 0;
+                int failCount    = 0;
+                StringBuilder errorLog = new StringBuilder();
+
                 foreach (ListViewItem item in items)
                 {
                     DataRow row = item.Tag as DataRow;
@@ -290,24 +304,22 @@ namespace stripMap_Editor.Forms
                     }
                 }
 
-                AppLogger.Info($"[{ActionTypes.STRIP_PURGE}_RESULT] user={_userId} | 성공={successCount} 실패={failCount}");
-                // ③ 결과 표시
-                if (failCount == 0)
-                    MessageBox.Show($"{successCount}건 Purge 완료.", "완료",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                else
-                    MessageBox.Show(
-                        $"성공: {successCount}건 / 실패: {failCount}건\n\n실패 목록:\n{errorLog}",
-                        "결과", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return (successCount, failCount, errorLog: errorLog.ToString());
+            });
 
-                // ④ 재조회
-                if (!string.IsNullOrEmpty(textBoxStripNo.Text.Trim()))
-                    LoadPurgeData(textBoxStripNo.Text.Trim());
-            }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
+            AppLogger.Info($"[{ActionTypes.STRIP_PURGE}_RESULT] user={_userId} | 성공={result.successCount} 실패={result.failCount}");
+            // ③ 결과 표시
+            if (result.failCount == 0)
+                MessageBox.Show($"{result.successCount}건 Purge 완료.", "완료",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            else
+                MessageBox.Show(
+                    $"성공: {result.successCount}건 / 실패: {result.failCount}건\n\n실패 목록:\n{result.errorLog}",
+                    "결과", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+            // ④ 재조회
+            if (!string.IsNullOrEmpty(searchStripNo))
+                await LoadPurgeDataAsync(searchStripNo);
         }
 
         // ── ListView 그리기 (파란 헤더) ──────────────────────────────
