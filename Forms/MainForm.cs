@@ -613,7 +613,7 @@ namespace stripMap_Editor.Forms
                         catch (SqlException sqlex)
                         {
                             failCount++;
-                            errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
+                            errorLog.AppendLine($"stripNo: {stripNo} - {SpErrorCodes.GetMessage(sqlex)}");
                         }
                         catch (Exception ex)
                         {
@@ -644,27 +644,6 @@ namespace stripMap_Editor.Forms
             {
                 MessageBox.Show($"저장 처리 중 오류: {ex.Message}", "오류",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        /// <summary>
-        /// SP THROW 에러 코드 → 사용자 메시지 변환
-        /// </summary>
-        private string GetSpErrorMessage(SqlException sqlex)
-        {
-            switch (sqlex.Number)
-            {
-                case 50001: return "지원하지 않는 작업 유형입니다.";
-                case 50002: return "이 작업에 대한 권한이 없습니다.";
-                case 50010: return "Purge 대상 이력을 찾을 수 없습니다. (timekey 불일치)";
-                case 50011: return "대상 TimeKey가 지정되지 않았습니다.";
-                case 50012: return "히스토리에서 대상 TimeKey를 찾을 수 없습니다.";
-                case 50020: return "관리자(ADMIN/SYSADMIN) 전용 작업입니다.";
-                case 50021: return "Purge 원복 대상 TimeKey가 지정되지 않았습니다.";
-                case 50030: return "지원하지 않는 작업 유형입니다.";
-                case 50040: return "targetVersion이 지정되지 않았습니다.";
-                case 50041: return "삭제 대상 행을 찾을 수 없습니다.";
-                default:    return sqlex.Message;
             }
         }
 
@@ -1213,7 +1192,7 @@ namespace stripMap_Editor.Forms
                         catch (SqlException sqlex)
                         {
                             failCount++;
-                            errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
+                            errorLog.AppendLine($"stripNo: {stripNo} - {SpErrorCodes.GetMessage(sqlex)}");
                         }
                         catch (Exception ex)
                         {
@@ -1416,7 +1395,7 @@ namespace stripMap_Editor.Forms
                         catch (SqlException sqlex)
                         {
                             failCount++;
-                            errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
+                            errorLog.AppendLine($"stripNo: {stripNo} - {SpErrorCodes.GetMessage(sqlex)}");
                         }
                         catch (Exception ex)
                         {
@@ -1956,7 +1935,7 @@ namespace stripMap_Editor.Forms
                         catch (SqlException sqlex)
                         {
                             failCount++;
-                            errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
+                            errorLog.AppendLine($"stripNo: {stripNo} - {SpErrorCodes.GetMessage(sqlex)}");
                         }
                         catch (Exception ex)
                         {
@@ -2073,7 +2052,7 @@ namespace stripMap_Editor.Forms
                         catch (SqlException sqlex)
                         {
                             failCount++;
-                            errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
+                            errorLog.AppendLine($"stripNo: {stripNo} - {SpErrorCodes.GetMessage(sqlex)}");
                         }
                         catch (Exception ex)
                         {

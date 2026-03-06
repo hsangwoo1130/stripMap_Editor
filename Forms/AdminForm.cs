@@ -295,7 +295,7 @@ namespace stripMap_Editor.Forms
                     catch (SqlException sqlex)
                     {
                         failCount++;
-                        errorLog.AppendLine($"stripNo: {stripNo} - {GetSpErrorMessage(sqlex)}");
+                        errorLog.AppendLine($"stripNo: {stripNo} - {SpErrorCodes.GetMessage(sqlex)}");
                     }
                     catch (Exception ex)
                     {
@@ -368,19 +368,6 @@ namespace stripMap_Editor.Forms
                 inputForm.CancelButton = cancel;
 
                 return inputForm.ShowDialog(this) == DialogResult.OK ? tb.Text.Trim() : null;
-            }
-        }
-
-        private string GetSpErrorMessage(SqlException sqlex)
-        {
-            switch (sqlex.Number)
-            {
-                case 50001: return "지원하지 않는 작업 유형입니다.";
-                case 50002: return "이 작업에 대한 권한이 없습니다.";
-                case 50012: return "복원 대상 STRIP_PURGE 이력을 찾을 수 없습니다.";
-                case 50040: return "targetVersion이 지정되지 않았습니다.";
-                case 50041: return "삭제 대상 행을 찾을 수 없습니다.";
-                default:    return sqlex.Message;
             }
         }
 
