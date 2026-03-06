@@ -723,8 +723,9 @@ namespace stripMap_Editor.Forms
                 }
                 return "127.0.0.1";
             }
-            catch
+            catch (Exception ex)
             {
+                AppLogger.Info($"[WARN] 로컬 IP 주소 조회 실패: {ex.Message}");
                 return "127.0.0.1";
             }
         }
