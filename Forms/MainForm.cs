@@ -238,6 +238,9 @@ namespace stripMap_Editor.Forms
             btnPurgeRollback_PCB.Click += BtnPurgeRollback_Click;
             btnPrevPeriod.Click += BtnPrevPeriod_Click;
             btnNextPeriod.Click += BtnNextPeriod_Click;
+            // 기간 라벨 초기값: 오늘 기준 한 달 표시
+            var (periodStart, periodEnd) = GetPeriodRange(0);
+            labelPeriod.Text = $"{periodStart:yyyy-MM-dd} ~ {periodEnd:yyyy-MM-dd}";
             listViewResult_PCB.ItemChecked += ListViewResult_ItemChecked;
             listViewResult_PCB.ColumnWidthChanging += ListView_ColumnWidthChanging;
 

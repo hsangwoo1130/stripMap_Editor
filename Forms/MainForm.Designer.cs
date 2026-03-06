@@ -718,7 +718,7 @@ namespace stripMap_Editor.Forms
             // 
             this.labelResultTitle.AutoSize  = false;
             this.labelResultTitle.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.labelResultTitle.Location = new System.Drawing.Point(21, 217);
+            this.labelResultTitle.Location = new System.Drawing.Point(21, 247);
             this.labelResultTitle.Name = "labelResultTitle";
             this.labelResultTitle.Size     = new System.Drawing.Size(165, 17);
             this.labelResultTitle.TabIndex = 4;
@@ -726,19 +726,20 @@ namespace stripMap_Editor.Forms
             //
             // btnPrevPeriod
             //
-            this.btnPrevPeriod.Font     = new System.Drawing.Font("맑은 고딕", 9F);
-            this.btnPrevPeriod.Location = new System.Drawing.Point(190, 214);
-            this.btnPrevPeriod.Name     = "btnPrevPeriod";
-            this.btnPrevPeriod.Size     = new System.Drawing.Size(24, 22);
-            this.btnPrevPeriod.TabIndex = 20;
-            this.btnPrevPeriod.Text     = "◀";
+            this.btnPrevPeriod.Font      = new System.Drawing.Font("맑은 고딕", 9F);
+            this.btnPrevPeriod.Location  = new System.Drawing.Point(47, 15);
+            this.btnPrevPeriod.Name      = "btnPrevPeriod";
+            this.btnPrevPeriod.Size      = new System.Drawing.Size(24, 22);
+            this.btnPrevPeriod.TabIndex  = 20;
+            this.btnPrevPeriod.Text      = "◀";
+            this.btnPrevPeriod.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.btnPrevPeriod.UseVisualStyleBackColor = true;
             //
             // labelPeriod
             //
             this.labelPeriod.AutoSize  = false;
             this.labelPeriod.Font      = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
-            this.labelPeriod.Location  = new System.Drawing.Point(217, 217);
+            this.labelPeriod.Location  = new System.Drawing.Point(74, 18);
             this.labelPeriod.Name      = "labelPeriod";
             this.labelPeriod.Size      = new System.Drawing.Size(190, 17);
             this.labelPeriod.TabIndex  = 21;
@@ -747,13 +748,14 @@ namespace stripMap_Editor.Forms
             //
             // btnNextPeriod
             //
-            this.btnNextPeriod.Enabled  = false;
-            this.btnNextPeriod.Font     = new System.Drawing.Font("맑은 고딕", 9F);
-            this.btnNextPeriod.Location = new System.Drawing.Point(410, 214);
-            this.btnNextPeriod.Name     = "btnNextPeriod";
-            this.btnNextPeriod.Size     = new System.Drawing.Size(24, 22);
-            this.btnNextPeriod.TabIndex = 22;
-            this.btnNextPeriod.Text     = "▶";
+            this.btnNextPeriod.Enabled   = false;
+            this.btnNextPeriod.Font      = new System.Drawing.Font("맑은 고딕", 9F);
+            this.btnNextPeriod.Location  = new System.Drawing.Point(267, 15);
+            this.btnNextPeriod.Name      = "btnNextPeriod";
+            this.btnNextPeriod.Size      = new System.Drawing.Size(24, 22);
+            this.btnNextPeriod.TabIndex  = 22;
+            this.btnNextPeriod.Text      = "▶";
+            this.btnNextPeriod.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.btnNextPeriod.UseVisualStyleBackColor = true;
             //
             // panelResult_PCB
@@ -762,9 +764,9 @@ namespace stripMap_Editor.Forms
             this.panelResult_PCB.BackColor = System.Drawing.Color.Silver;
             this.panelResult_PCB.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.panelResult_PCB.Controls.Add(this.listViewResult_PCB);
-            this.panelResult_PCB.Location = new System.Drawing.Point(19, 237);
+            this.panelResult_PCB.Location = new System.Drawing.Point(19, 267);
             this.panelResult_PCB.Name = "panelResult_PCB";
-            this.panelResult_PCB.Size = new System.Drawing.Size(1037, 331);
+            this.panelResult_PCB.Size = new System.Drawing.Size(1037, 301);
             this.panelResult_PCB.TabIndex = 1;
             // 
             // listViewResult_PCB
@@ -786,7 +788,7 @@ namespace stripMap_Editor.Forms
             this.listViewResult_PCB.Location = new System.Drawing.Point(3, 3);
             this.listViewResult_PCB.Name = "listViewResult_PCB";
             this.listViewResult_PCB.OwnerDraw = true;
-            this.listViewResult_PCB.Size = new System.Drawing.Size(1025, 321);
+            this.listViewResult_PCB.Size = new System.Drawing.Size(1025, 291);
             this.listViewResult_PCB.TabIndex = 0;
             this.listViewResult_PCB.UseCompatibleStateImageBehavior = false;
             this.listViewResult_PCB.View = System.Windows.Forms.View.Details;
@@ -847,7 +849,7 @@ namespace stripMap_Editor.Forms
             this.panelSearch.Controls.Add(this.labelPCBId);
             this.panelSearch.Controls.Add(this.labelLOTId);
             this.panelSearch.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.panelSearch.Location = new System.Drawing.Point(19, 21);
+            this.panelSearch.Location = new System.Drawing.Point(19, 51);
             this.panelSearch.Name = "panelSearch";
             this.panelSearch.Size = new System.Drawing.Size(518, 175);
             this.panelSearch.TabIndex = 0;
