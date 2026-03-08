@@ -1119,6 +1119,12 @@ namespace stripMap_Editor.Forms
 
         private void RefreshPreviewGrid()
         {
+            if (_currentColCnt <= 0)
+            {
+                MessageBox.Show("먼저 조회 결과에서 항목을 선택해 주세요.", "알림",
+                                MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
             string previewMapArray = textBoxMapArray.Text.Trim();
             SetGridMode(true);
             DrawGrid(previewMapArray, _currentColCnt, _currentRowCnt,
