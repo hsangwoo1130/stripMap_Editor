@@ -1092,8 +1092,8 @@ namespace stripMap_Editor.Forms
             if (row == null) return;
 
             _currentMapArray = row["mapArray"]?.ToString() ?? "";
-            SetGridMode(false);
             _currentBinCode  = row["bincode"]?.ToString() ?? "";
+            SetGridMode(false);
             _currentColCnt   = row.Table.Columns.Contains("colCnt") && row["colCnt"] != DBNull.Value
                                ? Convert.ToInt32(row["colCnt"]) : 0;
             _currentRowCnt   = row.Table.Columns.Contains("rowCnt") && row["rowCnt"] != DBNull.Value
@@ -1180,7 +1180,7 @@ namespace stripMap_Editor.Forms
             // binCode 자동 계산
             if (hasValue && !string.IsNullOrEmpty(_currentBinCode))
                 textBoxBinCode.Text = ComputeBinCode(textBoxMapArray.Text.Trim(), _currentBinCode);
-            else if (!hasValue)
+            else if (!hasValue && listViewResult_MapArray.SelectedItems.Count > 0)
                 textBoxBinCode.Text = _currentBinCode;  // mapArray 지우면 원본 복원
 
             if (!hasValue && _isPreviewMode)
