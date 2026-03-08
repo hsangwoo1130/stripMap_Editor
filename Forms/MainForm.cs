@@ -735,7 +735,7 @@ namespace stripMap_Editor.Forms
         /// </summary>
         private string ShowInputDialog(string message, string title)
         {
-            Form inputForm = new Form
+            using (Form inputForm = new Form
             {
                 Width = 400,
                 Height = 150,
@@ -744,46 +744,49 @@ namespace stripMap_Editor.Forms
                 FormBorderStyle = FormBorderStyle.FixedDialog,
                 MaximizeBox = false,
                 MinimizeBox = false
-            };
-
-            Label label = new Label
+            })
             {
-                Text = message,
-                Location = new Point(20, 20),
-                AutoSize = true
-            };
+                Label label = new Label
+                {
+                    Text = message,
+                    Location = new Point(20, 20),
+                    AutoSize = true
+                };
 
-            TextBox textBox = new TextBox
-            {
-                Location = new Point(20, 50),
-                Width = 340,
-                Font = new Font("맑은 고딕", 10F)
-            };
+                TextBox textBox = new TextBox
+                {
+                    Location = new Point(20, 50),
+                    Width = 340,
+                    Font = new Font("맑은 고딕", 10F)
+                };
 
-            Button okButton = new Button
-            {
-                Text = "확인",
-                DialogResult = DialogResult.OK,
-                Location = new Point(200, 80),
-                Width = 80
-            };
+                Button okButton = new Button
+                {
+                    Text = "확인",
+                    DialogResult = DialogResult.OK,
+                    Location = new Point(200, 80),
+                    Width = 80
+                };
 
-            Button cancelButton = new Button
-            {
-                Text = "취소",
-                DialogResult = DialogResult.Cancel,
-                Location = new Point(280, 80),
-                Width = 80
-            };
+                Button cancelButton = new Button
+                {
+                    Text = "취소",
+                    DialogResult = DialogResult.Cancel,
+                    Location = new Point(280, 80),
+                    Width = 80
+                };
 
-            inputForm.Controls.Add(label);
-            inputForm.Controls.Add(textBox);
-            inputForm.Controls.Add(okButton);
-            inputForm.Controls.Add(cancelButton);
-            inputForm.AcceptButton = okButton;
-            inputForm.CancelButton = cancelButton;
+                inputForm.Controls.Add(label);
+                inputForm.Controls.Add(textBox);
+                inputForm.Controls.Add(okButton);
+                inputForm.Controls.Add(cancelButton);
+                inputForm.AcceptButton = okButton;
+                inputForm.CancelButton = cancelButton;
 
-            return inputForm.ShowDialog() == DialogResult.OK ? textBox.Text : string.Empty;
+                bool ok = inputForm.ShowDialog() == DialogResult.OK;
+                string result = ok ? textBox.Text : string.Empty;
+                return result;
+            }
         }
 
         #endregion
