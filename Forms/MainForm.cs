@@ -328,6 +328,11 @@ namespace stripMap_Editor.Forms
 
             // 탭 컨트롤
             tabControl_Strip.SelectedIndexChanged -= TabControl_SelectedIndexChanged;
+
+            // DataTable 리소스 정리
+            originalData?.Dispose();
+            lotIdData?.Dispose();
+            mapArrayData?.Dispose();
         }
 
         /// <summary>
