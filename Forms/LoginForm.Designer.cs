@@ -13,6 +13,10 @@ namespace stripMap_Editor.Forms
             {
                 components.Dispose();
             }
+            if (disposing)
+            {
+                _logoBitmap?.Dispose();
+            }
             base.Dispose(disposing);
         }
 

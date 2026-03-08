@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using Konscious.Security.Cryptography;
 using StripMapEditor.Database;
+using StripMapEditor.Utils;
+using stripMap_Editor;
 
 namespace stripMap_Editor.Forms
 {
@@ -17,12 +19,7 @@ namespace stripMap_Editor.Forms
         public string LoggedInUserName { get; private set; }
         public string LoggedInUserRole { get; private set; }
 
-        // Argon2id 파라미터
-        private const int ARGON2_PARALLELISM = 2;
-        private const int ARGON2_MEMORY_SIZE  = 65536; // 64MB
-        private const int ARGON2_ITERATIONS   = 3;
-        private const int ARGON2_HASH_LENGTH  = 32;    // 256-bit
-        private const int ARGON2_SALT_LENGTH  = 16;    // 128-bit
+        private Bitmap _logoBitmap;
 
         public LoginForm()
         {
@@ -37,9 +34,9 @@ namespace stripMap_Editor.Forms
             {
                 if (Properties.Resources.SFA_logo != null)
                 {
-                    Bitmap logo = new Bitmap(Properties.Resources.SFA_logo);
-                    logo.MakeTransparent(Color.White);
-                    pictureBox_Login_Logo.Image = logo;
+                    _logoBitmap = new Bitmap(Properties.Resources.SFA_logo);
+                    _logoBitmap.MakeTransparent(Color.White);
+                    pictureBox_Login_Logo.Image = _logoBitmap;
                 }
             }
             catch (Exception ex)
@@ -196,8 +193,9 @@ namespace stripMap_Editor.Forms
 
                 return CryptographicEquals(actualHash, expectedHash);
             }
-            catch
+            catch (Exception ex)
             {
+                AppLogger.Info($"[WARN] 비밀번호 검증 중 예외 발생: {ex.Message}");
                 return false;
             }
         }
@@ -210,10 +208,10 @@ namespace stripMap_Editor.Forms
             using (var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password)))
             {
                 argon2.Salt                = salt;
-                argon2.DegreeOfParallelism = ARGON2_PARALLELISM;
-                argon2.MemorySize          = ARGON2_MEMORY_SIZE;
-                argon2.Iterations          = ARGON2_ITERATIONS;
-                return argon2.GetBytes(ARGON2_HASH_LENGTH);
+                argon2.DegreeOfParallelism = SecurityConstants.ARGON2_PARALLELISM;
+                argon2.MemorySize          = SecurityConstants.ARGON2_MEMORY_SIZE;
+                argon2.Iterations          = SecurityConstants.ARGON2_ITERATIONS;
+                return argon2.GetBytes(SecurityConstants.ARGON2_HASH_LENGTH);
             }
         }
 
@@ -223,7 +221,7 @@ namespace stripMap_Editor.Forms
         // ─────────────────────────────────────────────
         public static string CreatePasswordHash(string password)
         {
-            byte[] salt = new byte[ARGON2_SALT_LENGTH];
+            byte[] salt = new byte[SecurityConstants.ARGON2_SALT_LENGTH];
             using (var rng = new RNGCryptoServiceProvider())
                 rng.GetBytes(salt);
 
@@ -231,10 +229,10 @@ namespace stripMap_Editor.Forms
             using (var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password)))
             {
                 argon2.Salt                = salt;
-                argon2.DegreeOfParallelism = ARGON2_PARALLELISM;
-                argon2.MemorySize          = ARGON2_MEMORY_SIZE;
-                argon2.Iterations          = ARGON2_ITERATIONS;
-                hash = argon2.GetBytes(ARGON2_HASH_LENGTH);
+                argon2.DegreeOfParallelism = SecurityConstants.ARGON2_PARALLELISM;
+                argon2.MemorySize          = SecurityConstants.ARGON2_MEMORY_SIZE;
+                argon2.Iterations          = SecurityConstants.ARGON2_ITERATIONS;
+                hash = argon2.GetBytes(SecurityConstants.ARGON2_HASH_LENGTH);
             }
 
             return $"{Convert.ToBase64String(salt)}:{Convert.ToBase64String(hash)}";

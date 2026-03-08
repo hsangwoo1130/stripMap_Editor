@@ -40,6 +40,18 @@ namespace stripMap_Editor
     }
 
     /// <summary>
+    /// Argon2id 파라미터 상수 — tblUser.passwordHash 저장 형식: {salt_base64}:{hash_base64}
+    /// </summary>
+    public static class SecurityConstants
+    {
+        public const int ARGON2_PARALLELISM = 2;
+        public const int ARGON2_MEMORY_SIZE  = 65536; // 64MB
+        public const int ARGON2_ITERATIONS   = 3;
+        public const int ARGON2_HASH_LENGTH  = 32;    // 256-bit
+        public const int ARGON2_SALT_LENGTH  = 16;    // 128-bit
+    }
+
+    /// <summary>
     /// SP THROW 에러 코드 → 사용자 메시지 (중앙화)
     /// usp_StripMap_Process의 THROW 코드와 1:1 대응
     /// </summary>
