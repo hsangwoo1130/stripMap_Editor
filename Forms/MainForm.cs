@@ -1118,7 +1118,7 @@ namespace stripMap_Editor.Forms
         {
             if (string.IsNullOrEmpty(newMapArray) || string.IsNullOrEmpty(origBinCode)
                 || newMapArray.Length != origBinCode.Length)
-                return origBinCode;
+                return origBinCode ?? "";
 
             var sb = new StringBuilder(origBinCode);
             for (int i = 0; i < newMapArray.Length; i++)
@@ -1554,7 +1554,7 @@ namespace stripMap_Editor.Forms
                                 new SqlParameter("@changedYpos",   (object)yposList ?? DBNull.Value)
                             });
 
-                            AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}] user={currentUserId} | stripNo={stripNo} | mapArray={newMapArray} binCode={newBinCode}");
+                            AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}] user={currentUserId} | stripNo={stripNo} | mapArray={newMapArray} binCode={itemBinCode}");
                             for (int i = 0; i < changedCoords.xList.Count; i++)
                                 SendMesRvMessage(stripNo, "U", ActionTypes.STRIP_UPDATE,
                                                  changedCoords.xList[i], changedCoords.yList[i]);
