@@ -652,7 +652,9 @@ namespace stripMap_Editor.Forms
             this.richTextBoxGrid.TabIndex = 3;
             this.richTextBoxGrid.Text = "";
             this.richTextBoxGrid.WordWrap = false;
+            //
             // btnGridOriginal
+            //
             this.btnGridOriginal.BackColor = System.Drawing.Color.CornflowerBlue;
             this.btnGridOriginal.FlatAppearance.BorderSize = 0;
             this.btnGridOriginal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -665,7 +667,9 @@ namespace stripMap_Editor.Forms
             this.btnGridOriginal.Text = "기존";
             this.btnGridOriginal.UseVisualStyleBackColor = false;
 
+            //
             // btnGridPreview
+            //
             this.btnGridPreview.FlatAppearance.BorderSize = 1;
             this.btnGridPreview.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnGridPreview.Font = new System.Drawing.Font("맑은 고딕", 9F);
@@ -676,7 +680,9 @@ namespace stripMap_Editor.Forms
             this.btnGridPreview.Text = "미리보기";
             this.btnGridPreview.UseVisualStyleBackColor = true;
 
+            //
             // btnRefreshGrid
+            //
             this.btnRefreshGrid.Enabled = false;
             this.btnRefreshGrid.Font = new System.Drawing.Font("맑은 고딕", 9F);
             this.btnRefreshGrid.Location = new System.Drawing.Point(398, 8);
