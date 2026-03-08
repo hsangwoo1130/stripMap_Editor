@@ -63,6 +63,7 @@ namespace stripMap_Editor
             {
                 case 50001: return "지원하지 않는 작업 유형입니다.";
                 case 50002: return "이 작업에 대한 권한이 없습니다.";
+                case 50003: return "동일 PCB ID에 active=1 데이터가 중복 존재합니다. DB 관리자에게 문의하세요.";
                 case 50011: return "대상 TimeKey가 지정되지 않았습니다.";
                 case 50012: return "히스토리에서 대상 레코드를 찾을 수 없습니다.";
                 case 50021: return "Purge 원복 대상 TimeKey가 지정되지 않았습니다.";

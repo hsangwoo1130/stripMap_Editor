@@ -56,6 +56,10 @@ BEGIN
         ================================================================= */
         IF @actionType = 'U'
         BEGIN
+            -- 중복 active=1 체크: 2건 이상이면 데이터 정합성 오류로 차단
+            IF (SELECT COUNT(*) FROM dbo.tblStripMap WHERE stripNo = @stripNo AND process = @process AND active = 1) > 1
+                THROW 50003, 'Duplicate active records: multiple active=1 rows exist for this stripNo/process', 1;
+
             SELECT @newStripVersion = ISNULL(MAX([version]), 0) + 1
             FROM dbo.tblStripMap
             WHERE stripNo = @stripNo AND process = @process;
@@ -89,6 +93,10 @@ BEGIN
         ================================================================= */
         ELSE IF @actionType = 'L'
         BEGIN
+            -- 중복 active=1 체크: 2건 이상이면 데이터 정합성 오류로 차단
+            IF (SELECT COUNT(*) FROM dbo.tblStripMap WHERE stripNo = @stripNo AND process = @process AND active = 1) > 1
+                THROW 50003, 'Duplicate active records: multiple active=1 rows exist for this stripNo/process', 1;
+
             SELECT @newStripVersion = ISNULL(MAX([version]), 0) + 1
             FROM dbo.tblStripMap
             WHERE stripNo = @stripNo AND process = @process;
