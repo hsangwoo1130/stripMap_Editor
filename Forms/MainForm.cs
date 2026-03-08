@@ -1091,6 +1091,7 @@ namespace stripMap_Editor.Forms
             if (row == null) return;
 
             _currentMapArray = row["mapArray"]?.ToString() ?? "";
+            SetGridMode(false);
             _currentColCnt   = row.Table.Columns.Contains("colCnt") && row["colCnt"] != DBNull.Value
                                ? Convert.ToInt32(row["colCnt"]) : 0;
             _currentRowCnt   = row.Table.Columns.Contains("rowCnt") && row["rowCnt"] != DBNull.Value
@@ -1102,14 +1103,57 @@ namespace stripMap_Editor.Forms
 
         private void CheckBoxFlip_CheckedChanged(object sender, EventArgs e)
         {
+            string mapArray = _isPreviewMode ? textBoxMapArray.Text.Trim() : _currentMapArray;
+            DrawGrid(mapArray, _currentColCnt, _currentRowCnt,
+                     checkBoxVFlip.Checked, checkBoxHFlip.Checked);
+        }
+
+        private void SetGridMode(bool previewMode)
+        {
+            _isPreviewMode = previewMode;
+            btnGridOriginal.BackColor = previewMode ? SystemColors.Control     : Color.CornflowerBlue;
+            btnGridOriginal.ForeColor = previewMode ? SystemColors.ControlText : Color.White;
+            btnGridPreview.BackColor  = previewMode ? Color.CornflowerBlue     : SystemColors.Control;
+            btnGridPreview.ForeColor  = previewMode ? Color.White              : SystemColors.ControlText;
+        }
+
+        private void RefreshPreviewGrid()
+        {
+            string previewMapArray = textBoxMapArray.Text.Trim();
+            SetGridMode(true);
+            DrawGrid(previewMapArray, _currentColCnt, _currentRowCnt,
+                     checkBoxVFlip.Checked, checkBoxHFlip.Checked);
+        }
+
+        private void BtnGridOriginal_Click(object sender, EventArgs e)
+        {
+            SetGridMode(false);
             DrawGrid(_currentMapArray, _currentColCnt, _currentRowCnt,
                      checkBoxVFlip.Checked, checkBoxHFlip.Checked);
         }
 
-        private void BtnGridOriginal_Click(object sender, EventArgs e) { }
-        private void BtnGridPreview_Click(object sender, EventArgs e) { }
-        private void BtnRefreshGrid_Click(object sender, EventArgs e) { }
-        private void TextBoxMapArray_TextChanged(object sender, EventArgs e) { }
+        private void BtnGridPreview_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(textBoxMapArray.Text.Trim())) return;
+            RefreshPreviewGrid();
+        }
+
+        private void BtnRefreshGrid_Click(object sender, EventArgs e)
+        {
+            RefreshPreviewGrid();
+        }
+
+        private void TextBoxMapArray_TextChanged(object sender, EventArgs e)
+        {
+            bool hasValue = !string.IsNullOrEmpty(textBoxMapArray.Text.Trim());
+            btnRefreshGrid.Enabled = hasValue;
+            if (!hasValue && _isPreviewMode)
+            {
+                SetGridMode(false);
+                DrawGrid(_currentMapArray, _currentColCnt, _currentRowCnt,
+                         checkBoxVFlip.Checked, checkBoxHFlip.Checked);
+            }
+        }
 
         private void ListViewResultMapArrayBinCode_SelectedIndexChanged(object sender, EventArgs e)
         {
