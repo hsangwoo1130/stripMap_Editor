@@ -811,7 +811,6 @@ namespace stripMap_Editor.Forms
 
         // 그리드 시각화용 현재 선택 데이터
         private string _currentMapArray = "";
-        private string _currentBinCode   = "";
         private bool   _isPreviewMode    = false;
         private int    _currentColCnt   = 0;
         private int    _currentRowCnt   = 0;
@@ -1092,7 +1091,6 @@ namespace stripMap_Editor.Forms
             if (row == null) return;
 
             _currentMapArray = row["mapArray"]?.ToString() ?? "";
-            _currentBinCode  = row["bincode"]?.ToString() ?? "";
             SetGridMode(false);
             _currentColCnt   = row.Table.Columns.Contains("colCnt") && row["colCnt"] != DBNull.Value
                                ? Convert.ToInt32(row["colCnt"]) : 0;
@@ -1108,26 +1106,6 @@ namespace stripMap_Editor.Forms
             string mapArray = _isPreviewMode ? textBoxMapArray.Text.Trim() : _currentMapArray;
             DrawGrid(mapArray, _currentColCnt, _currentRowCnt,
                      checkBoxVFlip.Checked, checkBoxHFlip.Checked);
-        }
-
-        /// <summary>
-        /// newMapArray의 각 위치를 기준으로 binCode를 자동 계산한다.
-        /// '0' → '1', '2' → 'D', 그 외 → origBinCode[i] 유지
-        /// </summary>
-        private string ComputeBinCode(string newMapArray, string origBinCode)
-        {
-            if (string.IsNullOrEmpty(newMapArray) || string.IsNullOrEmpty(origBinCode)
-                || newMapArray.Length != origBinCode.Length)
-                return origBinCode ?? "";
-
-            var sb = new StringBuilder(origBinCode);
-            for (int i = 0; i < newMapArray.Length; i++)
-            {
-                if      (newMapArray[i] == '0') sb[i] = '1';
-                else if (newMapArray[i] == '2') sb[i] = 'D';
-                // 그 외: origBinCode[i] 그대로 유지
-            }
-            return sb.ToString();
         }
 
         private void SetGridMode(bool previewMode)
@@ -1176,13 +1154,6 @@ namespace stripMap_Editor.Forms
             bool hasValue = !string.IsNullOrEmpty(textBoxMapArray.Text.Trim());
             btnRefreshGrid.Enabled = hasValue;
             btnGridPreview.Enabled = hasValue;
-
-            // binCode 자동 계산
-            if (hasValue && !string.IsNullOrEmpty(_currentBinCode))
-                textBoxBinCode.Text = ComputeBinCode(textBoxMapArray.Text.Trim(), _currentBinCode);
-            else if (!hasValue && listViewResult_MapArray.SelectedItems.Count > 0)
-                textBoxBinCode.Text = _currentBinCode;  // mapArray 지우면 원본 복원
-
             if (!hasValue && _isPreviewMode)
             {
                 SetGridMode(false);
@@ -1519,13 +1490,7 @@ namespace stripMap_Editor.Forms
 
                             // 빈 값이면 NULL → SP의 COALESCE가 기존 DB 값 유지
                             object mapArrayParam = string.IsNullOrEmpty(newMapArray) ? (object)DBNull.Value : newMapArray;
-
-                            // per-item binCode 재계산 (mapArray 기반)
-                            string itemOrigBinCode = (item.Tag as DataRow)?["bincode"]?.ToString() ?? "";
-                            string itemBinCode = !string.IsNullOrEmpty(newMapArray) && !string.IsNullOrEmpty(itemOrigBinCode)
-                                ? ComputeBinCode(newMapArray, itemOrigBinCode)
-                                : newBinCode;
-                            object bincodeParam = string.IsNullOrEmpty(itemBinCode) ? (object)DBNull.Value : itemBinCode;
+                            object bincodeParam  = string.IsNullOrEmpty(newBinCode)  ? (object)DBNull.Value : newBinCode;
 
                             // 변경 좌표 계산
                             string origMapArray = row["mapArray"]?.ToString() ?? "";
@@ -1554,7 +1519,7 @@ namespace stripMap_Editor.Forms
                                 new SqlParameter("@changedYpos",   (object)yposList ?? DBNull.Value)
                             });
 
-                            AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}] user={currentUserId} | stripNo={stripNo} | mapArray={newMapArray} binCode={itemBinCode}");
+                            AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}] user={currentUserId} | stripNo={stripNo} | mapArray={newMapArray} binCode={newBinCode}");
                             for (int i = 0; i < changedCoords.xList.Count; i++)
                                 SendMesRvMessage(stripNo, "U", ActionTypes.STRIP_UPDATE,
                                                  changedCoords.xList[i], changedCoords.yList[i]);
