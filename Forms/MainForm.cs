@@ -231,6 +231,10 @@ namespace stripMap_Editor.Forms
             listViewResult_MapArray_BinCode.SelectedIndexChanged  += ListViewResultMapArrayBinCode_SelectedIndexChanged;
             this.checkBoxVFlip.CheckedChanged  += CheckBoxFlip_CheckedChanged;
             this.checkBoxHFlip.CheckedChanged  += CheckBoxFlip_CheckedChanged;
+            btnGridOriginal.Click      += BtnGridOriginal_Click;
+            btnGridPreview.Click       += BtnGridPreview_Click;
+            btnRefreshGrid.Click       += BtnRefreshGrid_Click;
+            textBoxMapArray.TextChanged += TextBoxMapArray_TextChanged;
 
             // PCB 2D ID 원복 탭 이벤트
             btnSearch_PCB.Click += BtnSearch_Click;
@@ -293,6 +297,10 @@ namespace stripMap_Editor.Forms
             listViewResult_MapArray_BinCode.SelectedIndexChanged -= ListViewResultMapArrayBinCode_SelectedIndexChanged;
             checkBoxVFlip.CheckedChanged -= CheckBoxFlip_CheckedChanged;
             checkBoxHFlip.CheckedChanged -= CheckBoxFlip_CheckedChanged;
+            btnGridOriginal.Click      -= BtnGridOriginal_Click;
+            btnGridPreview.Click       -= BtnGridPreview_Click;
+            btnRefreshGrid.Click       -= BtnRefreshGrid_Click;
+            textBoxMapArray.TextChanged -= TextBoxMapArray_TextChanged;
 
             // PCB 원복 탭
             btnSearch_PCB.Click          -= BtnSearch_Click;
@@ -803,6 +811,7 @@ namespace stripMap_Editor.Forms
 
         // 그리드 시각화용 현재 선택 데이터
         private string _currentMapArray = "";
+        private bool   _isPreviewMode    = false;
         private int    _currentColCnt   = 0;
         private int    _currentRowCnt   = 0;
 
@@ -1096,6 +1105,11 @@ namespace stripMap_Editor.Forms
             DrawGrid(_currentMapArray, _currentColCnt, _currentRowCnt,
                      checkBoxVFlip.Checked, checkBoxHFlip.Checked);
         }
+
+        private void BtnGridOriginal_Click(object sender, EventArgs e) { }
+        private void BtnGridPreview_Click(object sender, EventArgs e) { }
+        private void BtnRefreshGrid_Click(object sender, EventArgs e) { }
+        private void TextBoxMapArray_TextChanged(object sender, EventArgs e) { }
 
         private void ListViewResultMapArrayBinCode_SelectedIndexChanged(object sender, EventArgs e)
         {
