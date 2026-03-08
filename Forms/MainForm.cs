@@ -392,7 +392,12 @@ namespace stripMap_Editor.Forms
                 string stripNo = textBox_PCB2.Text.Trim();
                 string mgzRf = textBox_MGZ2.Text.Trim();
 
-                // 검색 조건 체크 제거 - 빈 값이어도 전체 조회
+                if (string.IsNullOrEmpty(lotNo) && string.IsNullOrEmpty(stripNo) && string.IsNullOrEmpty(mgzRf))
+                {
+                    MessageBox.Show("검색 조건을 하나 이상 입력해주세요.", "알림",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
                 await LoadLotIdDataAsync(lotNo, stripNo, mgzRf);
             }
             catch (Exception ex)
@@ -1314,7 +1319,7 @@ namespace stripMap_Editor.Forms
                                 new SqlParameter("@lotNo",         DBNull.Value),
                                 new SqlParameter("@targetTimekey", DBNull.Value),
                                 new SqlParameter("@workerId",      currentUserId),
-                                new SqlParameter("@comment",       $"Strip 삭제 (논리 삭제: active=0) | 사유: {comment}"),
+                                new SqlParameter("@comment",       $"Strip 논리 삭제 | 사유: {comment}"),
                                 new SqlParameter("@workerIp",      workerIp)
                             });
 
