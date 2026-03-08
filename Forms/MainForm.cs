@@ -1856,6 +1856,106 @@ namespace stripMap_Editor.Forms
         }
 
         /// <summary>
+        /// 체크된 항목이 모두 STRIP_PURGE 이력인지 검증한다.
+        /// PURGE 이력이 아닌 항목이 하나라도 있으면 오류 메시지를 표시하고 false를 반환한다.
+        /// </summary>
+        /// <returns>검증 통과(PURGE 이력만 선택됨) 시 true, 실패(MessageBox) 시 false</returns>
+        private bool ValidateOnlyPurgeItems(List<ListViewItem> checkedItems)
+        {
+            var nonPurgeItems = checkedItems.Where(item =>
+            {
+                DataRow row = item.Tag as DataRow;
+                if (row == null) return true;
+                string actionType = row["actionType"]?.ToString() ?? "";
+                return actionType != ActionTypes.STRIP_PURGE;
+            }).ToList();
+
+            if (nonPurgeItems.Count > 0)
+            {
+                MessageBox.Show(
+                    $"선택 항목 중 {nonPurgeItems.Count}건은 STRIP_PURGE 이력이 아닙니다.\n\n" +
+                    "Purge 복원은 STRIP_PURGE 이력 레코드(빨간색)만 대상으로 합니다.",
+                    "선택 오류",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 체크된 항목 중 동일 stripNo에서 active=1 이력이 여러 건 선택되었는지 검증한다.
+        /// active=0은 복수 선택 허용, active=1은 Strip 당 1건만 허용.
+        /// </summary>
+        /// <returns>검증 통과 시 true, 중복 선택 시 false</returns>
+        private bool ValidateNoDuplicateActivePurgeStripNos(List<ListViewItem> checkedItems)
+        {
+            var duplicateActiveOneStripNos = checkedItems
+                .Where(item => { DataRow r = item.Tag as DataRow; return r != null && Convert.ToBoolean(r["active"]); })
+                .Select(item => (item.Tag as DataRow)?["stripNo"]?.ToString() ?? "")
+                .GroupBy(s => s)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+
+            if (duplicateActiveOneStripNos.Count > 0)
+            {
+                MessageBox.Show(
+                    $"아래 Strip은 active=1 이력이 여러 건 선택되었습니다.\n" +
+                    $"active=1은 Strip 당 1건만 복원할 수 있습니다.\n\n" +
+                    $"중복 Strip:\n" + string.Join("\n", duplicateActiveOneStripNos.Select(s => $"  • {s}")),
+                    "중복 선택 오류",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 체크된 PURGE 이력 이후 수정 이력이 존재하는지 비동기로 확인하고 경고한다.
+        /// </summary>
+        /// <returns>계속 진행 시 true, 취소 시 false</returns>
+        private async Task<bool> CheckPurgePostChangesWarningAsync(List<ListViewItem> checkedItems)
+        {
+            var checkItems = checkedItems.Select(item =>
+            {
+                DataRow warnRow = item.Tag as DataRow;
+                if (warnRow == null) return (sNo: "", tk: "");
+                return (sNo: warnRow["stripNo"]?.ToString() ?? "", tk: warnRow["timekey"]?.ToString() ?? "");
+            }).Where(x => !string.IsNullOrEmpty(x.sNo) && !string.IsNullOrEmpty(x.tk)).ToList();
+
+            var stripsWithPostChanges = await Task.Run(() =>
+            {
+                var resultList = new List<string>();
+                foreach (var (sNo, tk) in checkItems)
+                {
+                    DataTable dtChk = DatabaseHelper.ExecuteQuery(
+                        "SELECT TOP 1 1 AS chk FROM dbo.tblStripMapHistory WHERE stripNo = @sn AND timekey > @tk AND actionType <> 'STRIP_PURGE'",
+                        new SqlParameter[] {
+                            new SqlParameter("@sn", sNo),
+                            new SqlParameter("@tk", tk)
+                        });
+                    if (dtChk.Rows.Count > 0)
+                        resultList.Add(sNo);
+                }
+                return resultList;
+            });
+
+            if (stripsWithPostChanges.Count > 0)
+            {
+                DialogResult warnResult = MessageBox.Show(
+                    "⚠️ 아래 Strip은 Purge 이후 수정 이력이 존재합니다.\n\n" +
+                    string.Join("\n", stripsWithPostChanges.Distinct().Select(s => $"  • {s}")) +
+                    "\n\nPurge 이후 변경된 내용은 반영되지 않습니다.\n그래도 계속하시겠습니까?",
+                    "Purge 이후 수정 이력 경고",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2);
+                if (warnResult != DialogResult.Yes) return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Purge 복원 버튼 클릭 — PURGE 이력 레코드를 tblStripMap으로 복원 (SP 'Q')
         /// 대상: actionType = 'PURGE' 인 이력 레코드만 선택 가능
         /// 권한: STRIP_PURGE_ROLLBACK (Admin 이상)
@@ -1872,12 +1972,7 @@ namespace stripMap_Editor.Forms
 
             try
             {
-                var checkedItems = new List<ListViewItem>();
-                foreach (ListViewItem item in listViewResult_PCB.Items)
-                {
-                    if (item.Checked)
-                        checkedItems.Add(item);
-                }
+                var checkedItems = GetCheckedPcbItems();
 
                 if (checkedItems.Count == 0)
                 {
@@ -1886,82 +1981,9 @@ namespace stripMap_Editor.Forms
                     return;
                 }
 
-                // ② PURGE 이력 여부 검증
-                var nonPurgeItems = checkedItems.Where(item =>
-                {
-                    DataRow row = item.Tag as DataRow;
-                    if (row == null) return true;
-                    string actionType = row["actionType"]?.ToString() ?? "";
-                    return actionType != ActionTypes.STRIP_PURGE;
-                }).ToList();
-
-                if (nonPurgeItems.Count > 0)
-                {
-                    MessageBox.Show(
-                        $"선택 항목 중 {nonPurgeItems.Count}건은 STRIP_PURGE 이력이 아닙니다.\n\n" +
-                        "Purge 복원은 STRIP_PURGE 이력 레코드(빨간색)만 대상으로 합니다.",
-                        "선택 오류",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // ③ 동일 stripNo에서 active=1 중복 선택 차단 (active=0은 복수 선택 허용)
-                var duplicateActiveOneStripNos = checkedItems
-                    .Where(item => { DataRow r = item.Tag as DataRow; return r != null && Convert.ToBoolean(r["active"]); })
-                    .Select(item => (item.Tag as DataRow)?["stripNo"]?.ToString() ?? "")
-                    .GroupBy(s => s)
-                    .Where(g => g.Count() > 1)
-                    .Select(g => g.Key)
-                    .ToList();
-
-                if (duplicateActiveOneStripNos.Count > 0)
-                {
-                    MessageBox.Show(
-                        $"아래 Strip은 active=1 이력이 여러 건 선택되었습니다.\n" +
-                        $"active=1은 Strip 당 1건만 복원할 수 있습니다.\n\n" +
-                        $"중복 Strip:\n" + string.Join("\n", duplicateActiveOneStripNos.Select(s => $"  • {s}")),
-                        "중복 선택 오류",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // ④ Purge 이후 수정 이력 존재 시 경고 — 사전 검증 DB 쿼리도 비동기
-                var checkItems = checkedItems.Select(item =>
-                {
-                    DataRow warnRow = item.Tag as DataRow;
-                    if (warnRow == null) return (sNo: "", tk: "");
-                    return (sNo: warnRow["stripNo"]?.ToString() ?? "", tk: warnRow["timekey"]?.ToString() ?? "");
-                }).Where(x => !string.IsNullOrEmpty(x.sNo) && !string.IsNullOrEmpty(x.tk)).ToList();
-
-                var stripsWithPostChanges = await Task.Run(() =>
-                {
-                    var resultList = new List<string>();
-                    foreach (var (sNo, tk) in checkItems)
-                    {
-                        DataTable dtChk = DatabaseHelper.ExecuteQuery(
-                            "SELECT TOP 1 1 AS chk FROM dbo.tblStripMapHistory WHERE stripNo = @sn AND timekey > @tk AND actionType <> 'STRIP_PURGE'",
-                            new SqlParameter[] {
-                                new SqlParameter("@sn", sNo),
-                                new SqlParameter("@tk", tk)
-                            });
-                        if (dtChk.Rows.Count > 0)
-                            resultList.Add(sNo);
-                    }
-                    return resultList;
-                });
-
-                if (stripsWithPostChanges.Count > 0)
-                {
-                    DialogResult warnResult = MessageBox.Show(
-                        "⚠️ 아래 Strip은 Purge 이후 수정 이력이 존재합니다.\n\n" +
-                        string.Join("\n", stripsWithPostChanges.Distinct().Select(s => $"  • {s}")) +
-                        "\n\nPurge 이후 변경된 내용은 반영되지 않습니다.\n그래도 계속하시겠습니까?",
-                        "Purge 이후 수정 이력 경고",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Warning,
-                        MessageBoxDefaultButton.Button2);
-                    if (warnResult != DialogResult.Yes) return;
-                }
+                if (!ValidateOnlyPurgeItems(checkedItems)) return;
+                if (!ValidateNoDuplicateActivePurgeStripNos(checkedItems)) return;
+                if (!await CheckPurgePostChangesWarningAsync(checkedItems)) return;
 
                 DialogResult result = MessageBox.Show(
                     $"⚠️ Purge 복원 확인 ⚠️\n\n" +

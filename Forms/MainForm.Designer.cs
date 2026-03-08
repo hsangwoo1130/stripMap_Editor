@@ -63,19 +63,21 @@ namespace stripMap_Editor.Forms
             this.columnHeaderMapArray_BinCode1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderMapArray_BinCode2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panelSearchMapArray = new System.Windows.Forms.Panel();
-            this.panelMapGrid    = new System.Windows.Forms.Panel();
-            this.checkBoxVFlip   = new System.Windows.Forms.CheckBox();
-            this.checkBoxHFlip   = new System.Windows.Forms.CheckBox();
-
-            this.richTextBoxGrid = new System.Windows.Forms.RichTextBox();
             this.btnSearch_MapArray = new System.Windows.Forms.Button();
             this.textBox_PCB_MapArray = new System.Windows.Forms.TextBox();
             this.labelPCBId_MapArray = new System.Windows.Forms.Label();
+            this.panelMapGrid = new System.Windows.Forms.Panel();
+            this.checkBoxVFlip = new System.Windows.Forms.CheckBox();
+            this.checkBoxHFlip = new System.Windows.Forms.CheckBox();
+            this.richTextBoxGrid = new System.Windows.Forms.RichTextBox();
             this.btnUpdate_MapArray = new stripMap_Editor.Controls.RoundedButton();
             this.btnDelete_MapArray = new stripMap_Editor.Controls.RoundedButton();
             this.tabPagePcbRestore = new System.Windows.Forms.TabPage();
             this.pictureBox_PCB_Logo = new System.Windows.Forms.PictureBox();
             this.labelResultTitle = new System.Windows.Forms.Label();
+            this.btnPrevPeriod = new System.Windows.Forms.Button();
+            this.labelPeriod = new System.Windows.Forms.Label();
+            this.btnNextPeriod = new System.Windows.Forms.Button();
             this.panelResult_PCB = new System.Windows.Forms.Panel();
             this.listViewResult_PCB = new System.Windows.Forms.ListView();
             this.columnHeaderPCBCheck = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -95,9 +97,6 @@ namespace stripMap_Editor.Forms
             this.labelLOTId = new System.Windows.Forms.Label();
             this.btnPurgeRollback_PCB = new stripMap_Editor.Controls.RoundedButton();
             this.btnRestore_PCB = new stripMap_Editor.Controls.RoundedButton();
-            this.btnPrevPeriod = new System.Windows.Forms.Button();
-            this.labelPeriod   = new System.Windows.Forms.Label();
-            this.btnNextPeriod = new System.Windows.Forms.Button();
             this.tabControl_Strip.SuspendLayout();
             this.tabPageLotId.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_LotId_Logo)).BeginInit();
@@ -105,6 +104,7 @@ namespace stripMap_Editor.Forms
             this.panelSearch2.SuspendLayout();
             this.tabPageMapArray.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_MapArray_Logo)).BeginInit();
+            this.panel2_MapArray_BorderMask.SuspendLayout();
             this.panelInputMapArray.SuspendLayout();
             this.panelResult_MapArray.SuspendLayout();
             this.panelSearchMapArray.SuspendLayout();
@@ -254,7 +254,7 @@ namespace stripMap_Editor.Forms
             // columnHeaderLotFill
             // 
             this.columnHeaderLotFill.Text = "";
-            this.columnHeaderLotFill.Width = 228;
+            this.columnHeaderLotFill.Width = 227;
             // 
             // panelSearch2
             // 
@@ -390,6 +390,7 @@ namespace stripMap_Editor.Forms
             // panel2_MapArray_BorderMask
             // 
             this.panel2_MapArray_BorderMask.BackColor = System.Drawing.Color.White;
+            this.panel2_MapArray_BorderMask.Controls.Add(this.panel_MapArray_BorderMask);
             this.panel2_MapArray_BorderMask.Location = new System.Drawing.Point(25, 288);
             this.panel2_MapArray_BorderMask.Name = "panel2_MapArray_BorderMask";
             this.panel2_MapArray_BorderMask.Size = new System.Drawing.Size(221, 2);
@@ -458,7 +459,6 @@ namespace stripMap_Editor.Forms
             // 
             this.panelResult_MapArray.BackColor = System.Drawing.Color.Silver;
             this.panelResult_MapArray.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.panelResult_MapArray.Controls.Add(this.panel_MapArray_BorderMask);
             this.panelResult_MapArray.Controls.Add(this.listViewResult_MapArray);
             this.panelResult_MapArray.Controls.Add(this.listViewResult_MapArray_BinCode);
             this.panelResult_MapArray.Location = new System.Drawing.Point(19, 237);
@@ -469,9 +469,9 @@ namespace stripMap_Editor.Forms
             // panel_MapArray_BorderMask
             // 
             this.panel_MapArray_BorderMask.BackColor = System.Drawing.Color.CornflowerBlue;
-            this.panel_MapArray_BorderMask.Location = new System.Drawing.Point(213, 49);
+            this.panel_MapArray_BorderMask.Location = new System.Drawing.Point(221, 0);
             this.panel_MapArray_BorderMask.Name = "panel_MapArray_BorderMask";
-            this.panel_MapArray_BorderMask.Size = new System.Drawing.Size(814, 2);
+            this.panel_MapArray_BorderMask.Size = new System.Drawing.Size(806, 2);
             this.panel_MapArray_BorderMask.TabIndex = 8;
             // 
             // listViewResult_MapArray
@@ -514,7 +514,7 @@ namespace stripMap_Editor.Forms
             // 
             this.columnHeaderMapArray2.Text = "MapArray";
             this.columnHeaderMapArray2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderMapArray2.Width = 805;
+            this.columnHeaderMapArray2.Width = 802;
             // 
             // listViewResult_MapArray_BinCode
             // 
@@ -555,7 +555,7 @@ namespace stripMap_Editor.Forms
             // 
             this.columnHeaderMapArray_BinCode2.Text = "Bin Code";
             this.columnHeaderMapArray_BinCode2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderMapArray_BinCode2.Width = 805;
+            this.columnHeaderMapArray_BinCode2.Width = 802;
             // 
             // panelSearchMapArray
             // 
@@ -569,56 +569,7 @@ namespace stripMap_Editor.Forms
             this.panelSearchMapArray.Name = "panelSearchMapArray";
             this.panelSearchMapArray.Size = new System.Drawing.Size(518, 175);
             this.panelSearchMapArray.TabIndex = 0;
-            //
-            // panelMapGrid
-            //
-            this.panelMapGrid.BackColor    = System.Drawing.Color.White;
-            this.panelMapGrid.BorderStyle  = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.panelMapGrid.Location     = new System.Drawing.Point(545, 21);
-            this.panelMapGrid.Name         = "panelMapGrid";
-            this.panelMapGrid.Size         = new System.Drawing.Size(511, 175);
-            this.panelMapGrid.TabIndex     = 10;
-            this.panelMapGrid.Controls.Add(this.checkBoxVFlip);
-            this.panelMapGrid.Controls.Add(this.checkBoxHFlip);
-
-            this.panelMapGrid.Controls.Add(this.richTextBoxGrid);
-            //
-            // checkBoxVFlip
-            //
-            this.checkBoxVFlip.AutoSize   = true;
-            this.checkBoxVFlip.Checked    = false;
-            this.checkBoxVFlip.CheckState = System.Windows.Forms.CheckState.Unchecked;
-            this.checkBoxVFlip.Font       = new System.Drawing.Font("맑은 고딕", 9.75F);
-            this.checkBoxVFlip.Location   = new System.Drawing.Point(10, 8);
-            this.checkBoxVFlip.Name       = "checkBoxVFlip";
-            this.checkBoxVFlip.Text       = "Vertical Flip";
-            this.checkBoxVFlip.TabIndex   = 0;
-            //
-            // checkBoxHFlip
-            //
-            this.checkBoxHFlip.AutoSize   = true;
-            this.checkBoxHFlip.Checked    = false;
-            this.checkBoxHFlip.CheckState = System.Windows.Forms.CheckState.Unchecked;
-            this.checkBoxHFlip.Font       = new System.Drawing.Font("맑은 고딕", 9.75F);
-            this.checkBoxHFlip.Location   = new System.Drawing.Point(130, 8);
-            this.checkBoxHFlip.Name       = "checkBoxHFlip";
-            this.checkBoxHFlip.Text       = "Horizontal Flip";
-            this.checkBoxHFlip.TabIndex   = 1;
-            //
-            // richTextBoxGrid
-            //
-            this.richTextBoxGrid.BackColor  = System.Drawing.Color.White;
-            this.richTextBoxGrid.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.richTextBoxGrid.Font        = new System.Drawing.Font("Courier New", 8.25F);
-            this.richTextBoxGrid.Location    = new System.Drawing.Point(5, 38);
-            this.richTextBoxGrid.Name        = "richTextBoxGrid";
-            this.richTextBoxGrid.ReadOnly    = true;
-            this.richTextBoxGrid.ScrollBars  = System.Windows.Forms.RichTextBoxScrollBars.Both;
-            this.richTextBoxGrid.Size        = new System.Drawing.Size(497, 128);
-            this.richTextBoxGrid.TabIndex    = 3;
-            this.richTextBoxGrid.Text        = "";
-            this.richTextBoxGrid.WordWrap    = false;
-            //
+            // 
             // btnSearch_MapArray
             // 
             this.btnSearch_MapArray.BackColor = System.Drawing.Color.CornflowerBlue;
@@ -650,6 +601,51 @@ namespace stripMap_Editor.Forms
             this.labelPCBId_MapArray.Size = new System.Drawing.Size(89, 20);
             this.labelPCBId_MapArray.TabIndex = 1;
             this.labelPCBId_MapArray.Text = "PCB 2D ID :";
+            // 
+            // panelMapGrid
+            // 
+            this.panelMapGrid.BackColor = System.Drawing.Color.White;
+            this.panelMapGrid.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.panelMapGrid.Controls.Add(this.checkBoxVFlip);
+            this.panelMapGrid.Controls.Add(this.checkBoxHFlip);
+            this.panelMapGrid.Controls.Add(this.richTextBoxGrid);
+            this.panelMapGrid.Location = new System.Drawing.Point(545, 21);
+            this.panelMapGrid.Name = "panelMapGrid";
+            this.panelMapGrid.Size = new System.Drawing.Size(511, 175);
+            this.panelMapGrid.TabIndex = 10;
+            // 
+            // checkBoxVFlip
+            // 
+            this.checkBoxVFlip.AutoSize = true;
+            this.checkBoxVFlip.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
+            this.checkBoxVFlip.Location = new System.Drawing.Point(10, 8);
+            this.checkBoxVFlip.Name = "checkBoxVFlip";
+            this.checkBoxVFlip.Size = new System.Drawing.Size(95, 21);
+            this.checkBoxVFlip.TabIndex = 0;
+            this.checkBoxVFlip.Text = "Vertical Flip";
+            // 
+            // checkBoxHFlip
+            // 
+            this.checkBoxHFlip.AutoSize = true;
+            this.checkBoxHFlip.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
+            this.checkBoxHFlip.Location = new System.Drawing.Point(130, 8);
+            this.checkBoxHFlip.Name = "checkBoxHFlip";
+            this.checkBoxHFlip.Size = new System.Drawing.Size(113, 21);
+            this.checkBoxHFlip.TabIndex = 1;
+            this.checkBoxHFlip.Text = "Horizontal Flip";
+            // 
+            // richTextBoxGrid
+            // 
+            this.richTextBoxGrid.BackColor = System.Drawing.Color.White;
+            this.richTextBoxGrid.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.richTextBoxGrid.Font = new System.Drawing.Font("Courier New", 8.25F);
+            this.richTextBoxGrid.Location = new System.Drawing.Point(5, 38);
+            this.richTextBoxGrid.Name = "richTextBoxGrid";
+            this.richTextBoxGrid.ReadOnly = true;
+            this.richTextBoxGrid.Size = new System.Drawing.Size(497, 128);
+            this.richTextBoxGrid.TabIndex = 3;
+            this.richTextBoxGrid.Text = "";
+            this.richTextBoxGrid.WordWrap = false;
             // 
             // btnUpdate_MapArray
             // 
@@ -716,48 +712,43 @@ namespace stripMap_Editor.Forms
             // 
             // labelResultTitle
             // 
-            this.labelResultTitle.AutoSize  = false;
             this.labelResultTitle.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.labelResultTitle.Location = new System.Drawing.Point(21, 247);
             this.labelResultTitle.Name = "labelResultTitle";
-            this.labelResultTitle.Size     = new System.Drawing.Size(165, 17);
+            this.labelResultTitle.Size = new System.Drawing.Size(165, 17);
             this.labelResultTitle.TabIndex = 4;
             this.labelResultTitle.Text = "조회 결과";
-            //
+            // 
             // btnPrevPeriod
-            //
-            this.btnPrevPeriod.Font      = new System.Drawing.Font("맑은 고딕", 9F);
-            this.btnPrevPeriod.Location  = new System.Drawing.Point(47, 15);
-            this.btnPrevPeriod.Name      = "btnPrevPeriod";
-            this.btnPrevPeriod.Size      = new System.Drawing.Size(24, 22);
-            this.btnPrevPeriod.TabIndex  = 20;
-            this.btnPrevPeriod.Text      = "◀";
-            this.btnPrevPeriod.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            this.btnPrevPeriod.Font = new System.Drawing.Font("맑은 고딕", 9F);
+            this.btnPrevPeriod.Location = new System.Drawing.Point(47, 15);
+            this.btnPrevPeriod.Name = "btnPrevPeriod";
+            this.btnPrevPeriod.Size = new System.Drawing.Size(24, 22);
+            this.btnPrevPeriod.TabIndex = 20;
+            this.btnPrevPeriod.Text = "◀";
             this.btnPrevPeriod.UseVisualStyleBackColor = true;
-            //
+            // 
             // labelPeriod
-            //
-            this.labelPeriod.AutoSize  = false;
-            this.labelPeriod.Font      = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
-            this.labelPeriod.Location  = new System.Drawing.Point(74, 18);
-            this.labelPeriod.Name      = "labelPeriod";
-            this.labelPeriod.Size      = new System.Drawing.Size(190, 17);
-            this.labelPeriod.TabIndex  = 21;
-            this.labelPeriod.Text      = "";
+            // 
+            this.labelPeriod.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            this.labelPeriod.Location = new System.Drawing.Point(74, 18);
+            this.labelPeriod.Name = "labelPeriod";
+            this.labelPeriod.Size = new System.Drawing.Size(190, 17);
+            this.labelPeriod.TabIndex = 21;
             this.labelPeriod.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            //
+            // 
             // btnNextPeriod
-            //
-            this.btnNextPeriod.Enabled   = false;
-            this.btnNextPeriod.Font      = new System.Drawing.Font("맑은 고딕", 9F);
-            this.btnNextPeriod.Location  = new System.Drawing.Point(267, 15);
-            this.btnNextPeriod.Name      = "btnNextPeriod";
-            this.btnNextPeriod.Size      = new System.Drawing.Size(24, 22);
-            this.btnNextPeriod.TabIndex  = 22;
-            this.btnNextPeriod.Text      = "▶";
-            this.btnNextPeriod.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            this.btnNextPeriod.Enabled = false;
+            this.btnNextPeriod.Font = new System.Drawing.Font("맑은 고딕", 9F);
+            this.btnNextPeriod.Location = new System.Drawing.Point(267, 15);
+            this.btnNextPeriod.Name = "btnNextPeriod";
+            this.btnNextPeriod.Size = new System.Drawing.Size(24, 22);
+            this.btnNextPeriod.TabIndex = 22;
+            this.btnNextPeriod.Text = "▶";
             this.btnNextPeriod.UseVisualStyleBackColor = true;
-            //
+            // 
             // panelResult_PCB
             // 
             this.panelResult_PCB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
@@ -835,7 +826,7 @@ namespace stripMap_Editor.Forms
             // 
             this.columnHeaderPCB5.Text = "생성 시각";
             this.columnHeaderPCB5.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeaderPCB5.Width = 230;
+            this.columnHeaderPCB5.Width = 234;
             // 
             // panelSearch
             // 
@@ -974,6 +965,7 @@ namespace stripMap_Editor.Forms
             this.tabPageMapArray.ResumeLayout(false);
             this.tabPageMapArray.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_MapArray_Logo)).EndInit();
+            this.panel2_MapArray_BorderMask.ResumeLayout(false);
             this.panelInputMapArray.ResumeLayout(false);
             this.panelInputMapArray.PerformLayout();
             this.panelResult_MapArray.ResumeLayout(false);
@@ -982,7 +974,6 @@ namespace stripMap_Editor.Forms
             this.panelMapGrid.ResumeLayout(false);
             this.panelMapGrid.PerformLayout();
             this.tabPagePcbRestore.ResumeLayout(false);
-            this.tabPagePcbRestore.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_PCB_Logo)).EndInit();
             this.panelResult_PCB.ResumeLayout(false);
             this.panelSearch.ResumeLayout(false);
