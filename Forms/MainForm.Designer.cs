@@ -67,6 +67,9 @@ namespace stripMap_Editor.Forms
             this.textBox_PCB_MapArray = new System.Windows.Forms.TextBox();
             this.labelPCBId_MapArray = new System.Windows.Forms.Label();
             this.panelMapGrid = new System.Windows.Forms.Panel();
+            this.btnGridOriginal = new System.Windows.Forms.Button();
+            this.btnGridPreview  = new System.Windows.Forms.Button();
+            this.btnRefreshGrid  = new System.Windows.Forms.Button();
             this.checkBoxVFlip = new System.Windows.Forms.CheckBox();
             this.checkBoxHFlip = new System.Windows.Forms.CheckBox();
             this.richTextBoxGrid = new System.Windows.Forms.RichTextBox();
@@ -606,6 +609,9 @@ namespace stripMap_Editor.Forms
             // 
             this.panelMapGrid.BackColor = System.Drawing.Color.White;
             this.panelMapGrid.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.panelMapGrid.Controls.Add(this.btnGridOriginal);
+            this.panelMapGrid.Controls.Add(this.btnGridPreview);
+            this.panelMapGrid.Controls.Add(this.btnRefreshGrid);
             this.panelMapGrid.Controls.Add(this.checkBoxVFlip);
             this.panelMapGrid.Controls.Add(this.checkBoxHFlip);
             this.panelMapGrid.Controls.Add(this.richTextBoxGrid);
@@ -618,7 +624,7 @@ namespace stripMap_Editor.Forms
             // 
             this.checkBoxVFlip.AutoSize = true;
             this.checkBoxVFlip.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
-            this.checkBoxVFlip.Location = new System.Drawing.Point(10, 8);
+            this.checkBoxVFlip.Location = new System.Drawing.Point(10, 36);
             this.checkBoxVFlip.Name = "checkBoxVFlip";
             this.checkBoxVFlip.Size = new System.Drawing.Size(95, 21);
             this.checkBoxVFlip.TabIndex = 0;
@@ -628,7 +634,7 @@ namespace stripMap_Editor.Forms
             // 
             this.checkBoxHFlip.AutoSize = true;
             this.checkBoxHFlip.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
-            this.checkBoxHFlip.Location = new System.Drawing.Point(130, 8);
+            this.checkBoxHFlip.Location = new System.Drawing.Point(130, 36);
             this.checkBoxHFlip.Name = "checkBoxHFlip";
             this.checkBoxHFlip.Size = new System.Drawing.Size(113, 21);
             this.checkBoxHFlip.TabIndex = 1;
@@ -639,14 +645,47 @@ namespace stripMap_Editor.Forms
             this.richTextBoxGrid.BackColor = System.Drawing.Color.White;
             this.richTextBoxGrid.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.richTextBoxGrid.Font = new System.Drawing.Font("Courier New", 8.25F);
-            this.richTextBoxGrid.Location = new System.Drawing.Point(5, 38);
+            this.richTextBoxGrid.Location = new System.Drawing.Point(5, 62);
             this.richTextBoxGrid.Name = "richTextBoxGrid";
             this.richTextBoxGrid.ReadOnly = true;
-            this.richTextBoxGrid.Size = new System.Drawing.Size(497, 128);
+            this.richTextBoxGrid.Size = new System.Drawing.Size(497, 104);
             this.richTextBoxGrid.TabIndex = 3;
             this.richTextBoxGrid.Text = "";
             this.richTextBoxGrid.WordWrap = false;
-            // 
+            // btnGridOriginal
+            this.btnGridOriginal.BackColor = System.Drawing.Color.CornflowerBlue;
+            this.btnGridOriginal.FlatAppearance.BorderSize = 0;
+            this.btnGridOriginal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnGridOriginal.Font = new System.Drawing.Font("맑은 고딕", 9F);
+            this.btnGridOriginal.ForeColor = System.Drawing.Color.White;
+            this.btnGridOriginal.Location = new System.Drawing.Point(10, 8);
+            this.btnGridOriginal.Name = "btnGridOriginal";
+            this.btnGridOriginal.Size = new System.Drawing.Size(50, 22);
+            this.btnGridOriginal.TabIndex = 4;
+            this.btnGridOriginal.Text = "기존";
+            this.btnGridOriginal.UseVisualStyleBackColor = false;
+
+            // btnGridPreview
+            this.btnGridPreview.FlatAppearance.BorderSize = 1;
+            this.btnGridPreview.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnGridPreview.Font = new System.Drawing.Font("맑은 고딕", 9F);
+            this.btnGridPreview.Location = new System.Drawing.Point(63, 8);
+            this.btnGridPreview.Name = "btnGridPreview";
+            this.btnGridPreview.Size = new System.Drawing.Size(65, 22);
+            this.btnGridPreview.TabIndex = 5;
+            this.btnGridPreview.Text = "미리보기";
+            this.btnGridPreview.UseVisualStyleBackColor = true;
+
+            // btnRefreshGrid
+            this.btnRefreshGrid.Enabled = false;
+            this.btnRefreshGrid.Font = new System.Drawing.Font("맑은 고딕", 9F);
+            this.btnRefreshGrid.Location = new System.Drawing.Point(398, 8);
+            this.btnRefreshGrid.Name = "btnRefreshGrid";
+            this.btnRefreshGrid.Size = new System.Drawing.Size(95, 22);
+            this.btnRefreshGrid.TabIndex = 6;
+            this.btnRefreshGrid.Text = "새로고침 ↺";
+            this.btnRefreshGrid.UseVisualStyleBackColor = true;
+            //
             // btnUpdate_MapArray
             // 
             this.btnUpdate_MapArray.BackColor = System.Drawing.Color.CornflowerBlue;
@@ -1164,6 +1203,9 @@ namespace stripMap_Editor.Forms
         private System.Windows.Forms.CheckBox checkBoxVFlip;
         private System.Windows.Forms.CheckBox checkBoxHFlip;
         private System.Windows.Forms.RichTextBox richTextBoxGrid;
+        private System.Windows.Forms.Button btnGridOriginal;
+        private System.Windows.Forms.Button btnGridPreview;
+        private System.Windows.Forms.Button btnRefreshGrid;
 
         // PCB 2D ID 원복 탭 컨트롤들
         private System.Windows.Forms.Panel panelSearch;
