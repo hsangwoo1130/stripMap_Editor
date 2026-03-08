@@ -1458,18 +1458,6 @@ namespace stripMap_Editor.Forms
                 }
                 // ── 자릿수 검증 끝 ──
 
-                // ── mapArray 입력 시 binCode 자동 계산 ──
-                if (!string.IsNullOrEmpty(newMapArray) && checkedItems.Count > 0)
-                {
-                    var firstRow = checkedItems[0].Tag as DataRow;
-                    if (firstRow != null)
-                    {
-                        string origBinCode = firstRow["bincode"]?.ToString() ?? "";
-                        newBinCode = ComputeBinCode(newMapArray, origBinCode);
-                    }
-                }
-                // ── binCode 자동 계산 끝 ──
-
                 DialogResult result = MessageBox.Show(
                     $"{checkedItems.Count}건의 데이터를 수정하시겠습니까?",
                     "수정 확인",
@@ -1531,7 +1519,13 @@ namespace stripMap_Editor.Forms
 
                             // 빈 값이면 NULL → SP의 COALESCE가 기존 DB 값 유지
                             object mapArrayParam = string.IsNullOrEmpty(newMapArray) ? (object)DBNull.Value : newMapArray;
-                            object bincodeParam  = string.IsNullOrEmpty(newBinCode)  ? (object)DBNull.Value : newBinCode;
+
+                            // per-item binCode 재계산 (mapArray 기반)
+                            string itemOrigBinCode = (item.Tag as DataRow)?["bincode"]?.ToString() ?? "";
+                            string itemBinCode = !string.IsNullOrEmpty(newMapArray) && !string.IsNullOrEmpty(itemOrigBinCode)
+                                ? ComputeBinCode(newMapArray, itemOrigBinCode)
+                                : newBinCode;
+                            object bincodeParam = string.IsNullOrEmpty(itemBinCode) ? (object)DBNull.Value : itemBinCode;
 
                             // 변경 좌표 계산
                             string origMapArray = row["mapArray"]?.ToString() ?? "";
