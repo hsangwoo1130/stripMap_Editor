@@ -1153,6 +1153,7 @@ namespace stripMap_Editor.Forms
         {
             bool hasValue = !string.IsNullOrEmpty(textBoxMapArray.Text.Trim());
             btnRefreshGrid.Enabled = hasValue;
+            btnGridPreview.Enabled = hasValue;
             if (!hasValue && _isPreviewMode)
             {
                 SetGridMode(false);

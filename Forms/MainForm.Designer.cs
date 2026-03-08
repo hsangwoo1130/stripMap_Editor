@@ -678,6 +678,7 @@ namespace stripMap_Editor.Forms
             this.btnGridPreview.Size = new System.Drawing.Size(65, 22);
             this.btnGridPreview.TabIndex = 5;
             this.btnGridPreview.Text = "미리보기";
+            this.btnGridPreview.Enabled = false;
             this.btnGridPreview.UseVisualStyleBackColor = true;
 
             //
