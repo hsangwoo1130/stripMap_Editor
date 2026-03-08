@@ -1458,6 +1458,18 @@ namespace stripMap_Editor.Forms
                 }
                 // ── 자릿수 검증 끝 ──
 
+                // ── mapArray 입력 시 binCode 자동 계산 ──
+                if (!string.IsNullOrEmpty(newMapArray) && checkedItems.Count > 0)
+                {
+                    var firstRow = checkedItems[0].Tag as DataRow;
+                    if (firstRow != null)
+                    {
+                        string origBinCode = firstRow["bincode"]?.ToString() ?? "";
+                        newBinCode = ComputeBinCode(newMapArray, origBinCode);
+                    }
+                }
+                // ── binCode 자동 계산 끝 ──
+
                 DialogResult result = MessageBox.Show(
                     $"{checkedItems.Count}건의 데이터를 수정하시겠습니까?",
                     "수정 확인",
