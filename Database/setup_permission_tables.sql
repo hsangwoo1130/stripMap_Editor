@@ -49,24 +49,17 @@ END
 ELSE PRINT 'tblUser 이미 존재 — 건너뜀';
 GO
 
--- ※ 초기 계정: admin / Admin1234!
---   아래 해시값은 위 비밀번호의 Argon2id 해시입니다.
---   운영 환경에서는 반드시 비밀번호를 변경하세요.
-IF NOT EXISTS (SELECT 1 FROM dbo.tblUser WHERE userId = 'admin')
-BEGIN
-    INSERT INTO dbo.tblUser (userId, userName, passwordHash, isActive)
-    VALUES (
-        'admin',
-        N'관리자',
-        'bXlTYWx0U2FtcGxlMTY=:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
-        -- ↑ 위 해시는 플레이스홀더입니다.
-        --   실제 사용을 위해서는 아래 방법으로 해시를 교체하세요:
-        --   1. 앱을 Debug 빌드로 실행
-        --   2. LoginForm.cs의 HashPassword("원하는비밀번호") 호출 결과값을 이 컬럼에 UPDATE
-        1
-    );
-    PRINT '초기 admin 계정 삽입 — 비밀번호 해시 교체 필요';
-END
+-- 테스트용 계정 3개 (Argon2id 해시 — 운영 전 비밀번호 변경 권고)
+MERGE dbo.tblUser AS T
+USING (VALUES
+    ('admin01', N'관리자',     '5rkzuMPFKhgsg2FZ74SiKQ==:dbbo5Y9lgLgIjtWorJXjERjhQU0fVgKhtutuomxJo+Q=', 1),
+    ('super01', N'슈퍼관리자', 'MbHuEI69lNTvTMr12nqARA==:D5nMISTfu0iivGJqeFRvhosltwfXKiKPHhb8JSXoIEo=', 1),
+    ('user01',  N'일반사용자', '8RBeZv5oqFeTG9hQDWL8Ng==:LIC68ktT9t9Wa83rX5BOorbiJCiGGy+mfK6XsGxEt9Q=', 1)
+) AS S (userId, userName, passwordHash, isActive)
+ON T.userId = S.userId
+WHEN NOT MATCHED THEN INSERT (userId, userName, passwordHash, isActive)
+    VALUES (S.userId, S.userName, S.passwordHash, S.isActive);
+PRINT '초기 사용자 계정 적용 완료 (admin01 / super01 / user01)';
 GO
 
 -- =====================================================
@@ -86,8 +79,14 @@ END
 ELSE PRINT 'tblUserRole 이미 존재 — 건너뜀';
 GO
 
-IF NOT EXISTS (SELECT 1 FROM dbo.tblUserRole WHERE userId = 'admin' AND roleId = 'SUPER')
-    INSERT INTO dbo.tblUserRole (userId, roleId) VALUES ('admin', 'SUPER');
+MERGE dbo.tblUserRole AS T
+USING (VALUES
+    ('admin01', 'ADMIN'),
+    ('super01', 'SUPER'),
+    ('user01',  'USER')
+) AS S (userId, roleId)
+ON T.userId = S.userId AND T.roleId = S.roleId
+WHEN NOT MATCHED THEN INSERT (userId, roleId) VALUES (S.userId, S.roleId);
 PRINT 'tblUserRole 초기 데이터 적용 완료';
 GO
 
