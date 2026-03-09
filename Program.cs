@@ -84,25 +84,27 @@ namespace StripMapEditor
             string network    = ini.Read("RV", "Network",    "");
             string daemon     = ini.Read("RV", "Daemon",     "");
             string subject    = ini.Read("RV", "Subject",    "");
-            bool   simulation = ini.Read("RV", "Simulation", "false")
-                                   .Equals("true", StringComparison.OrdinalIgnoreCase);
-
             var rv = new RvManager
             {
-                Service        = service,
-                Network        = network,
-                Daemon         = daemon,
-                Subject        = subject,
-                SimulationMode = simulation
+                Service = service,
+                Network = network,
+                Daemon  = daemon,
+                Subject = subject,
+#if DEBUG
+                SimulationMode = ini.Read("RV", "Simulation", "false")
+                                    .Equals("true", StringComparison.OrdinalIgnoreCase)
+#endif
             };
 
-            if (simulation)
+#if DEBUG
+            if (rv.SimulationMode)
             {
                 AppLogger.Info("[RV] 시뮬레이션 모드 — 실제 TIBCO 연결 없이 로그만 기록합니다.");
                 rv.RvInit();
                 rv.RvConnect();
                 return rv;
             }
+#endif
 
             if (string.IsNullOrWhiteSpace(service) || string.IsNullOrWhiteSpace(network)
                 || string.IsNullOrWhiteSpace(daemon) || string.IsNullOrWhiteSpace(subject))
