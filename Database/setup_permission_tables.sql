@@ -27,7 +27,7 @@ MERGE dbo.tblRole AS T
 USING (VALUES
     ('USER',  N'일반 사용자'),
     ('ADMIN', N'관리자'),
-    ('SUPER', N'슈퍼 관리자')
+    ('SUPER', N'시스템 관리자')
 ) AS S (roleId, roleName)
 ON T.roleId = S.roleId
 WHEN NOT MATCHED THEN INSERT (roleId, roleName) VALUES (S.roleId, S.roleName);
@@ -61,7 +61,7 @@ GO
 MERGE dbo.tblUser AS T
 USING (VALUES
     ('admin01', N'관리자',     '5rkzuMPFKhgsg2FZ74SiKQ==:dbbo5Y9lgLgIjtWorJXjERjhQU0fVgKhtutuomxJo+Q=', 1),
-    ('super01', N'슈퍼관리자', 'MbHuEI69lNTvTMr12nqARA==:D5nMISTfu0iivGJqeFRvhosltwfXKiKPHhb8JSXoIEo=', 1),
+    ('super01', N'시스템관리자', 'MbHuEI69lNTvTMr12nqARA==:D5nMISTfu0iivGJqeFRvhosltwfXKiKPHhb8JSXoIEo=', 1),
     ('user01',  N'일반사용자', '8RBeZv5oqFeTG9hQDWL8Ng==:LIC68ktT9t9Wa83rX5BOorbiJCiGGy+mfK6XsGxEt9Q=', 1)
 ) AS S (userId, userName, passwordHash, isActive)
 ON T.userId = S.userId
@@ -117,12 +117,12 @@ GO
 
 MERGE dbo.tblFunction AS T
 USING (VALUES
-    ('STRIP_UPDATE',         N'Strip 수정',   N'MapArray/BinCode 수정', 1),
-    ('LOT_UPDATE',           N'LOT ID 수정',  N'LOT ID 수정',           1),
-    ('STRIP_DELETE',         N'논리 삭제',    N'MapArray 논리 삭제',    1),
-    ('STRIP_PURGE',          N'물리 삭제',    N'Strip 물리 삭제',       1),
-    ('STRIP_ROLLBACK',       N'PCB 원복',     N'PCB 원복(복원)',        1),
-    ('STRIP_PURGE_ROLLBACK', N'Purge 복원',   N'물리 삭제 복원',        1)
+    ('STRIP_UPDATE',         N'Strip 수정',   N'MapArrayBinCode 수정', 1),
+    ('LOT_UPDATE',           N'LOT ID 수정',  N'LOT ID 수정', 1),
+    ('STRIP_DELETE',         N'논리 삭제',    N'논리 삭제', 1),
+    ('STRIP_PURGE',          N'물리 삭제',    N'물리 삭제', 1),
+    ('STRIP_ROLLBACK',       N'PCB 원복',     N'이력 복구', 1),
+    ('STRIP_PURGE_ROLLBACK', N'Purge 복원',   N'물리 삭제 복구', 1)
 ) AS S (functionId, functionName, description, isActive)
 ON T.functionId = S.functionId
 WHEN NOT MATCHED THEN INSERT (functionId, functionName, description, isActive)
@@ -183,8 +183,8 @@ GO
 
 MERGE dbo.tblActionFunction AS T
 USING (VALUES
-    ('U', 'STRIP_UPDATE',         N'MapArray/BinCode 수정'),
-    ('L', 'LOT_UPDATE',           N'LOT ID 수정'),
+    ('U', 'STRIP_UPDATE',         N'Strip 수정'),
+    ('L', 'LOT_UPDATE',           N'LOT 변경'),
     ('D', 'STRIP_DELETE',         N'논리 삭제'),
     ('P', 'STRIP_PURGE',          N'물리 삭제'),
     ('R', 'STRIP_ROLLBACK',       N'PCB 원복'),
@@ -220,13 +220,11 @@ MERGE dbo.tblRoleFunction AS T
 USING (VALUES
     ('USER',  'STRIP_UPDATE'),
     ('USER',  'LOT_UPDATE'),
-    ('USER',  'STRIP_ROLLBACK'),
     ('ADMIN', 'STRIP_UPDATE'),
     ('ADMIN', 'LOT_UPDATE'),
     ('ADMIN', 'STRIP_DELETE'),
     ('ADMIN', 'STRIP_PURGE'),
     ('ADMIN', 'STRIP_ROLLBACK'),
-    ('ADMIN', 'STRIP_PURGE_ROLLBACK'),
     ('SUPER', 'STRIP_UPDATE'),
     ('SUPER', 'LOT_UPDATE'),
     ('SUPER', 'STRIP_DELETE'),
@@ -314,7 +312,6 @@ BEGIN
         unitIdList     VARCHAR(MAX) NULL,
         changedXpos    VARCHAR(20)  NULL,
         changedYpos    VARCHAR(20)  NULL,
-        spare5         VARCHAR(20)  NULL,
         CONSTRAINT tblStripMap_2 PRIMARY KEY CLUSTERED (stripNo ASC, [version] DESC)
     );
     PRINT 'tblStripMap 생성 완료';
@@ -355,7 +352,6 @@ BEGIN
         unitIdList     VARCHAR(MAX) NULL,
         changedXpos    VARCHAR(200) NULL,
         changedYpos    VARCHAR(200) NULL,
-        spare5         VARCHAR(200) NULL,
         workerId       VARCHAR(20)  NOT NULL,
         actionType     VARCHAR(20)  NOT NULL,
         comment        VARCHAR(500) NULL,
