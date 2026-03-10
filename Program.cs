@@ -106,11 +106,12 @@ namespace StripMapEditor
             }
 #endif
 
-            if (string.IsNullOrWhiteSpace(daemon) || string.IsNullOrWhiteSpace(subject))
+            if (string.IsNullOrWhiteSpace(service)
+                || string.IsNullOrWhiteSpace(daemon) || string.IsNullOrWhiteSpace(subject))
             {
                 AppLogger.Info("[RV] config.ini [RV] 설정이 비어 있어 프로그램을 종료합니다.");
                 MessageBox.Show(
-                    "RV 연결 정보가 설정되지 않았습니다.\nconfig.ini [RV] 섹션의 Daemon / Subject를 입력 후 재시작하세요.",
+                    "RV 연결 정보가 설정되지 않았습니다.\nconfig.ini [RV] 섹션의 Service / Daemon / Subject를 입력 후 재시작하세요.",
                     "RV 연결 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
