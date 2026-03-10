@@ -1,4 +1,4 @@
--- CREATE OR ALTER: 기존 권한(GRANT EXECUTE 등)을 유지하면서 SP를 수정합니다.
+﻿-- CREATE OR ALTER: 기존 권한(GRANT EXECUTE 등)을 유지하면서 SP를 수정합니다.
 CREATE OR ALTER PROCEDURE [dbo].[usp_StripMap_Process]
 (
     @actionType      CHAR(1),

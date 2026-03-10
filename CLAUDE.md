@@ -98,6 +98,20 @@ All DB operations go directly through `DatabaseHelper`; the `Business/` and `Mod
 - **Serilog + Serilog.Sinks.File** — structured logging
 - **System.Data.SqlClient 4.9.0** — SQL Server connectivity
 
+## SP 적용 방법
+
+SP 파일 위치: `Database/usp_StripMap_Process.sql` (인코딩: **UTF-8 with BOM**)
+
+```bash
+# sqlcmd으로 SP 적용 (BOM이 있으면 한글 주석 정상 처리됨)
+sqlcmd -S 192.168.10.79 -d SFA_TEST_DB -U sfa_test_login -P sfa_test_login -i Database\usp_StripMap_Process.sql
+```
+
+> **주의**: SQL 파일을 편집 후 저장할 때 반드시 **UTF-8 with BOM**으로 저장해야 합니다.
+> UTF-8 without BOM으로 저장하면 sqlcmd가 CP949로 읽어 한글 주석이 깨져 DB에 저장됩니다.
+> - Visual Studio Code: 우하단 인코딩 클릭 → "Save with Encoding" → `UTF-8 with BOM` 선택
+> - Visual Studio: 파일 → 다른 이름으로 저장 → 저장 버튼 드롭다운 → "인코딩하여 저장" → `Unicode (UTF-8 서명 있음)`
+
 ## DB Schema Notes (inferred from queries)
 
 - `tblUser` — userId, userName, passwordHash, isActive
