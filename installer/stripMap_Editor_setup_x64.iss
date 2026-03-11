@@ -1,7 +1,7 @@
 #define AppName "StripMap Editor"
-#define AppVersion "1.1.0"
+#define AppVersion "1.2.0"
 #define AppExeName "stripMap_Editor.exe"
-#define SourceDir "..\bin\Release"
+#define SourceDir "..\bin\x64\Release"
 #define OutputDir "."
 
 [Setup]
