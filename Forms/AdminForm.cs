@@ -30,7 +30,7 @@ namespace stripMap_Editor.Forms
             _rv          = rv;
         }
 
-        private void SendMesRvMessage(string frameId, string actionType, string functionId)
+        private void SendMesRvMessage(string frameId, string lotId, string actionType)
         {
             if (_rv == null || !_rv.IsConnected) return;
             try
@@ -38,20 +38,21 @@ namespace stripMap_Editor.Forms
                 string xml =
                     "<message>" +
                       "<header>" +
-                        $"<messagename>{functionId}</messagename>" +
+                        "<messagename>PMS_MAP_MODIFY</messagename>" +
                       "</header>" +
                       "<body>" +
                         $"<FRAME_ID>{frameId}</FRAME_ID>" +
+                        $"<LOT_ID>{lotId}</LOT_ID>" +
                         $"<ACTIONTYPE>{actionType}</ACTIONTYPE>" +
-                        "<FRAME_LOC_XPOS>0</FRAME_LOC_XPOS>" +
-                        "<FRAME_LOC_YPOS>0</FRAME_LOC_YPOS>" +
+                        "<FRAME_LOC_XPOS></FRAME_LOC_XPOS>" +
+                        "<FRAME_LOC_YPOS></FRAME_LOC_YPOS>" +
                       "</body>" +
                     "</message>";
                 _rv.RvSend(_rv.Subject, xml);
             }
             catch (Exception ex)
             {
-                AppLogger.Info($"[RV_SEND_FAIL] frameId={frameId} actionType={actionType} | {ex.Message}");
+                AppLogger.Info($"[RV_SEND_FAIL] frameId={frameId} lotId={lotId} actionType={actionType} | {ex.Message}");
             }
         }
 
@@ -291,7 +292,7 @@ namespace stripMap_Editor.Forms
                             });
 
                         AppLogger.Info($"[{ActionTypes.STRIP_PURGE}] user={_userId} | stripNo={stripNo} ver={version} | 사유={comment}");
-                        SendMesRvMessage(stripNo, "P", ActionTypes.STRIP_PURGE);
+                        SendMesRvMessage(stripNo, row["lotNo"]?.ToString() ?? "", "P");
                         successCount++;
                     }
                     catch (SqlException sqlex)

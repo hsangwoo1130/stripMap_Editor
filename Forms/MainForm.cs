@@ -684,7 +684,7 @@ namespace stripMap_Editor.Forms
                             });
 
                             AppLogger.Info($"[{ActionTypes.LOT_UPDATE}] user={currentUserId} | stripNo={stripNo} | {oldLotId} → {newLotId}");
-                            SendMesRvMessage(stripNo, "L", ActionTypes.LOT_UPDATE);
+                            SendMesRvMessage(stripNo, newLotId, "L");
                             successCount++;
                         }
                         catch (SqlException sqlex)
@@ -1324,7 +1324,7 @@ namespace stripMap_Editor.Forms
                             });
 
                             AppLogger.Info($"[{ActionTypes.STRIP_DELETE}] user={currentUserId} | stripNo={stripNo} | 사유={comment}");
-                            SendMesRvMessage(stripNo, "D", ActionTypes.STRIP_DELETE);
+                            SendMesRvMessage(stripNo, row["lotNo"]?.ToString() ?? "", "D");
                             successCount++;
                         }
                         catch (SqlException sqlex)
@@ -1492,6 +1492,7 @@ namespace stripMap_Editor.Forms
                         {
                             stripNo  = row["stripNo"]?.ToString();
                             string process = row["process"]?.ToString();
+                            string lotId   = row["lotNo"]?.ToString() ?? "";
 
                             // 빈 값이면 NULL → SP의 COALESCE가 기존 DB 값 유지
                             object mapArrayParam = string.IsNullOrEmpty(newMapArray) ? (object)DBNull.Value : newMapArray;
@@ -1526,7 +1527,7 @@ namespace stripMap_Editor.Forms
 
                             AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}] user={currentUserId} | stripNo={stripNo} | mapArray={newMapArray} binCode={newBinCode}");
                             for (int i = 0; i < changedCoords.xList.Count; i++)
-                                SendMesRvMessage(stripNo, "U", ActionTypes.STRIP_UPDATE,
+                                SendMesRvMessage(stripNo, lotId, "U",
                                                  changedCoords.xList[i], changedCoords.yList[i]);
                             successCount++;
                         }
@@ -1748,12 +1749,12 @@ namespace stripMap_Editor.Forms
                     : timekey;
                 item.SubItems.Add(displayTime);
 
-                // actionType이 STRIP_PURGE면 다른 색으로 표시
+                // actionType이 STRIP_PURGE / PURGE_ROLLBACK이면 빨간색으로 표시
                 string actionType = row["actionType"]?.ToString() ?? "";
-                bool isPurgeRecord = actionType == ActionTypes.STRIP_PURGE;
+                bool isPurgeRecord = actionType == ActionTypes.STRIP_PURGE || actionType == ActionTypes.STRIP_PURGE_ROLLBACK;
                 if (isPurgeRecord)
                 {
-                    item.BackColor = Color.LightCoral;  // Purge 이력은 빨간색
+                    item.BackColor = Color.LightCoral;
 
                     // Purge 원복 권한이 없으면 회색 표시
                     if (!HasPermission(UserPermissions.STRIP_PURGE_ROLLBACK))
@@ -1840,14 +1841,15 @@ namespace stripMap_Editor.Forms
             var purgeItems = checkedItems.Where(item =>
             {
                 DataRow r = item.Tag as DataRow;
-                return r != null && (r["actionType"]?.ToString() ?? "") == ActionTypes.STRIP_PURGE;
+                string at = r?["actionType"]?.ToString() ?? "";
+                return at == ActionTypes.STRIP_PURGE || at == ActionTypes.STRIP_PURGE_ROLLBACK;
             }).ToList();
 
             if (purgeItems.Count > 0)
             {
                 MessageBox.Show(
-                    $"선택 항목 중 {purgeItems.Count}건은 STRIP_PURGE 이력입니다.\n\n" +
-                    "Purge 이력 복원은 '원복' 버튼이 아닌 'Purge복원' 버튼을 사용하세요.",
+                    $"선택 항목 중 {purgeItems.Count}건은 STRIP_PURGE / PURGE_ROLLBACK 이력입니다.\n\n" +
+                    "해당 이력은 '원복' 버튼으로 처리할 수 없습니다.",
                     "선택 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
@@ -2209,11 +2211,12 @@ namespace stripMap_Editor.Forms
                             string process = row["process"]?.ToString();
                             string targetTimekey = row["timekey"]?.ToString();
                             string actionType = row["actionType"] != DBNull.Value ? row["actionType"].ToString() : string.Empty;
+                            string lotId = row["lotNo"]?.ToString() ?? "";
 
-                            if (actionType == ActionTypes.STRIP_PURGE)
+                            if (actionType == ActionTypes.STRIP_PURGE || actionType == ActionTypes.STRIP_PURGE_ROLLBACK)
                             {
                                 failCount++;
-                                errorLog.AppendLine($"stripNo: {stripNo} - STRIP_PURGE 이력은 'Purge복원' 버튼을 사용하세요.");
+                                errorLog.AppendLine($"stripNo: {stripNo} - STRIP_PURGE / PURGE_ROLLBACK 이력은 '원복' 버튼으로 처리할 수 없습니다.");
                                 continue;
                             }
 
@@ -2241,7 +2244,23 @@ namespace stripMap_Editor.Forms
                             });
 
                             AppLogger.Info($"[{ActionTypes.STRIP_ROLLBACK}] user={currentUserId} | stripNo={stripNo} | timekey={targetTimekey}");
-                            SendMesRvMessage(stripNo, "R", ActionTypes.STRIP_ROLLBACK);
+                            string changedXpos = row["changedXpos"] != DBNull.Value ? row["changedXpos"].ToString() : "";
+                            string changedYpos = row["changedYpos"] != DBNull.Value ? row["changedYpos"].ToString() : "";
+                            if (!string.IsNullOrEmpty(changedXpos) && !string.IsNullOrEmpty(changedYpos))
+                            {
+                                string[] xArr = changedXpos.Split(',');
+                                string[] yArr = changedYpos.Split(',');
+                                int coordCount = Math.Min(xArr.Length, yArr.Length);
+                                for (int i = 0; i < coordCount; i++)
+                                {
+                                    if (int.TryParse(xArr[i].Trim(), out int cx) && int.TryParse(yArr[i].Trim(), out int cy))
+                                        SendMesRvMessage(stripNo, lotId, "R", cx, cy);
+                                }
+                            }
+                            else
+                            {
+                                SendMesRvMessage(stripNo, lotId, "R");
+                            }
                             successCount++;
                         }
                         catch (SqlException sqlex)
@@ -2410,18 +2429,19 @@ namespace stripMap_Editor.Forms
         /// <summary>
         /// MES 전송용 XML 메시지를 생성합니다.
         /// </summary>
-        private string BuildMesRvXml(string frameId, string actionType, string functionId, int xpos = 0, int ypos = 0)
+        private string BuildMesRvXml(string frameId, string lotId, string actionType, int? xpos = null, int? ypos = null)
         {
             return
                 "<message>" +
                   "<header>" +
-                    $"<messagename>{functionId}</messagename>" +
+                    "<messagename>PMS_MAP_MODIFY</messagename>" +
                   "</header>" +
                   "<body>" +
                     $"<FRAME_ID>{frameId}</FRAME_ID>" +
+                    $"<LOT_ID>{lotId}</LOT_ID>" +
                     $"<ACTIONTYPE>{actionType}</ACTIONTYPE>" +
-                    $"<FRAME_LOC_XPOS>{xpos}</FRAME_LOC_XPOS>" +
-                    $"<FRAME_LOC_YPOS>{ypos}</FRAME_LOC_YPOS>" +
+                    $"<FRAME_LOC_XPOS>{(xpos.HasValue ? xpos.Value.ToString() : "")}</FRAME_LOC_XPOS>" +
+                    $"<FRAME_LOC_YPOS>{(ypos.HasValue ? ypos.Value.ToString() : "")}</FRAME_LOC_YPOS>" +
                   "</body>" +
                 "</message>";
         }
@@ -2429,16 +2449,16 @@ namespace stripMap_Editor.Forms
         /// <summary>
         /// MES RV 메시지를 전송합니다. RV 미연결 시 로그만 남기고 무시합니다.
         /// </summary>
-        private void SendMesRvMessage(string frameId, string actionType, string functionId, int xpos = 0, int ypos = 0)
+        private void SendMesRvMessage(string frameId, string lotId, string actionType, int? xpos = null, int? ypos = null)
         {
             if (Rv == null || !Rv.IsConnected) return;
             try
             {
-                Rv.RvSend(Rv.Subject, BuildMesRvXml(frameId, actionType, functionId, xpos, ypos));
+                Rv.RvSend(Rv.Subject, BuildMesRvXml(frameId, lotId, actionType, xpos, ypos));
             }
             catch (Exception ex)
             {
-                AppLogger.Info($"[RV_SEND_FAIL] frameId={frameId} actionType={actionType} xpos={xpos} ypos={ypos} | {ex.Message}");
+                AppLogger.Info($"[RV_SEND_FAIL] frameId={frameId} lotId={lotId} actionType={actionType} xpos={xpos} ypos={ypos} | {ex.Message}");
             }
         }
 

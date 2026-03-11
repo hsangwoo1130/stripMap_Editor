@@ -258,7 +258,7 @@ BEGIN
         END
         ELSE
         BEGIN
-            THROW 50030, 'Unsupported actionType', 1;
+            ;THROW 50030, 'Unsupported actionType', 1;
         END
 
         COMMIT;
