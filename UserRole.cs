@@ -35,8 +35,8 @@ namespace stripMap_Editor
         public const string STRIP_UPDATE         = "STRIP_UPDATE";         // Strip 수정       (actionType=U)
         public const string STRIP_DELETE         = "STRIP_DELETE";         // 논리 삭제        (actionType=D)
         public const string STRIP_PURGE          = "STRIP_PURGE";          // 물리 삭제        (actionType=P)
-        public const string STRIP_PURGE_ROLLBACK = "STRIP_PURGE_ROLLBACK"; // Purge 복원       (actionType=Q)
-        public const string STRIP_ROLLBACK       = "STRIP_ROLLBACK";       // Rollback(원복)   (actionType=R)
+        public const string STRIP_PURGE_ROLLBACK = "PURGE_ROLLBACK";       // Purge 복원       (actionType=Q) — DB tblStripMapHistory 저장값
+        public const string STRIP_ROLLBACK       = "ROLLBACK";             // Rollback(원복)   (actionType=R) — DB tblStripMapHistory 저장값
     }
 
     /// <summary>

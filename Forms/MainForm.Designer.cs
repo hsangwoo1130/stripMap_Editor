@@ -758,10 +758,11 @@ namespace stripMap_Editor.Forms
             // 
             // labelResultTitle
             // 
+            this.labelResultTitle.AutoSize = true;
             this.labelResultTitle.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.labelResultTitle.Location = new System.Drawing.Point(21, 247);
             this.labelResultTitle.Name = "labelResultTitle";
-            this.labelResultTitle.Size = new System.Drawing.Size(165, 17);
+            this.labelResultTitle.Size = new System.Drawing.Size(65, 17);
             this.labelResultTitle.TabIndex = 4;
             this.labelResultTitle.Text = "조회 결과";
             // 

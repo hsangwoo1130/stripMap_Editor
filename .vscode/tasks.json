@@ -8,6 +8,7 @@
             "args": [
                 "${workspaceFolder}\\stripMap_Editor.sln",
                 "/p:Configuration=Debug",
+                "/p:Platform=x86",
                 "/t:Build",
                 "/v:minimal",
                 "/nologo"
@@ -62,7 +63,7 @@
         {
             "label": "Run: Debug",
             "type": "process",
-            "command": "${workspaceFolder}\\bin\\Debug\\stripMap_Editor.exe",
+            "command": "${workspaceFolder}\\bin\\x86\\Debug\\stripMap_Editor.exe",
             "dependsOn": "Build: Debug",
             "group": "test",
             "presentation": {

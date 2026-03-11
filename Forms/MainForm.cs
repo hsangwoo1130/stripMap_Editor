@@ -1655,7 +1655,9 @@ namespace stripMap_Editor.Forms
                     comment,
                     actionType,
                     workerId,
-                    createdTime
+                    createdTime,
+                    changedXpos,
+                    changedYpos
                 FROM dbo.[tblStripMapHistory]
                 WHERE 1=1
                 ");
@@ -1749,9 +1751,10 @@ namespace stripMap_Editor.Forms
                     : timekey;
                 item.SubItems.Add(displayTime);
 
-                // actionType이 STRIP_PURGE / PURGE_ROLLBACK이면 빨간색으로 표시
+                // actionType별 배경색 구분
                 string actionType = row["actionType"]?.ToString() ?? "";
-                bool isPurgeRecord = actionType == ActionTypes.STRIP_PURGE || actionType == ActionTypes.STRIP_PURGE_ROLLBACK;
+                bool isPurgeRecord    = actionType == ActionTypes.STRIP_PURGE || actionType == ActionTypes.STRIP_PURGE_ROLLBACK;
+                bool isRollbackRecord = actionType == ActionTypes.STRIP_ROLLBACK;
                 if (isPurgeRecord)
                 {
                     item.BackColor = Color.LightCoral;
@@ -1761,6 +1764,10 @@ namespace stripMap_Editor.Forms
                     {
                         item.ForeColor = Color.Gray;
                     }
+                }
+                else if (isRollbackRecord)
+                {
+                    item.BackColor = Color.Gainsboro;  // 원복 이력 — 연회색
                 }
 
                 item.Tag = row;
@@ -1842,13 +1849,13 @@ namespace stripMap_Editor.Forms
             {
                 DataRow r = item.Tag as DataRow;
                 string at = r?["actionType"]?.ToString() ?? "";
-                return at == ActionTypes.STRIP_PURGE || at == ActionTypes.STRIP_PURGE_ROLLBACK;
+                return at == ActionTypes.STRIP_PURGE || at == ActionTypes.STRIP_PURGE_ROLLBACK || at == ActionTypes.STRIP_ROLLBACK;
             }).ToList();
 
             if (purgeItems.Count > 0)
             {
                 MessageBox.Show(
-                    $"선택 항목 중 {purgeItems.Count}건은 STRIP_PURGE / PURGE_ROLLBACK 이력입니다.\n\n" +
+                    $"선택 항목 중 {purgeItems.Count}건은 원복 불가 이력(STRIP_PURGE / PURGE_ROLLBACK / ROLLBACK)입니다.\n\n" +
                     "해당 이력은 '원복' 버튼으로 처리할 수 없습니다.",
                     "선택 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
@@ -1946,7 +1953,7 @@ namespace stripMap_Editor.Forms
             {
                 MessageBox.Show(
                     $"선택 항목 중 {nonPurgeItems.Count}건은 STRIP_PURGE 이력이 아닙니다.\n\n" +
-                    "Purge 복원은 STRIP_PURGE 이력 레코드(빨간색)만 대상으로 합니다.",
+                    "Purge 복원은 STRIP_PURGE 이력 레코드만 대상으로 합니다.",
                     "선택 오류",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
@@ -2213,10 +2220,10 @@ namespace stripMap_Editor.Forms
                             string actionType = row["actionType"] != DBNull.Value ? row["actionType"].ToString() : string.Empty;
                             string lotId = row["lotNo"]?.ToString() ?? "";
 
-                            if (actionType == ActionTypes.STRIP_PURGE || actionType == ActionTypes.STRIP_PURGE_ROLLBACK)
+                            if (actionType == ActionTypes.STRIP_PURGE || actionType == ActionTypes.STRIP_PURGE_ROLLBACK || actionType == ActionTypes.STRIP_ROLLBACK)
                             {
                                 failCount++;
-                                errorLog.AppendLine($"stripNo: {stripNo} - STRIP_PURGE / PURGE_ROLLBACK 이력은 '원복' 버튼으로 처리할 수 없습니다.");
+                                errorLog.AppendLine($"stripNo: {stripNo} - STRIP_PURGE / PURGE_ROLLBACK / ROLLBACK 이력은 '원복' 버튼으로 처리할 수 없습니다.");
                                 continue;
                             }
 
