@@ -37,12 +37,14 @@ namespace stripMap_Editor.Forms
             {
                 string xml =
                     "<message>" +
-                      $"<header><messagename>{functionId}</messagename></header>" +
+                      "<header>" +
+                        $"<messagename>{functionId}</messagename>" +
+                      "</header>" +
                       "<body>" +
                         $"<FRAME_ID>{frameId}</FRAME_ID>" +
                         $"<ACTIONTYPE>{actionType}</ACTIONTYPE>" +
-                        "<FRAME_LOC_XPOS></FRAME_LOC_XPOS>" +
-                        "<FRAME_LOC_YPOS></FRAME_LOC_YPOS>" +
+                        "<FRAME_LOC_XPOS>0</FRAME_LOC_XPOS>" +
+                        "<FRAME_LOC_YPOS>0</FRAME_LOC_YPOS>" +
                       "</body>" +
                     "</message>";
                 _rv.RvSend(_rv.Subject, xml);
