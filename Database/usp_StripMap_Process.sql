@@ -66,8 +66,8 @@ BEGIN
 
             -- ① History 기록 (Before-image)
             INSERT dbo.tblStripMapHistory
-            (timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos, workerId, actionType, comment, workerIp)
-            SELECT @timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, @changedXpos, @changedYpos, @workerId, 'UPDATE', @comment, @workerIp
+            (timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5, changedXpos, changedYpos, workerId, actionType, comment, workerIp)
+            SELECT @timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5, @changedXpos, @changedYpos, @workerId, 'UPDATE', @comment, @workerIp
             FROM dbo.tblStripMap
             WHERE stripNo = @stripNo AND process = @process AND active = 1;
 
@@ -77,12 +77,12 @@ BEGIN
 
             -- ③ 신규행 재입력 (History에서 불변 필드 참조, 변경필드 COALESCE 사용)
             INSERT dbo.tblStripMap
-            (active, [lock], stripNo, [version], process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos)
+            (active, [lock], stripNo, [version], process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5)
             SELECT 1, [lock], @stripNo, @newStripVersion, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt,
                    COALESCE(@mapArray, mapArray),
                    createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate,
                    COALESCE(@bincode, bincode),
-                   unitIdList, @changedXpos, @changedYpos
+                   unitIdList, spare3, spare4, spare5
             FROM dbo.tblStripMapHistory
             WHERE timekey = @timekey;
         END
@@ -103,8 +103,8 @@ BEGIN
 
             -- ① History 기록 (Before-image)
             INSERT dbo.tblStripMapHistory
-            (timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos, workerId, actionType, comment, workerIp)
-            SELECT @timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos, @workerId, 'LOT_UPDATE', @comment, @workerIp
+            (timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5, changedXpos, changedYpos, workerId, actionType, comment, workerIp)
+            SELECT @timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5, NULL, NULL, @workerId, 'LOT_UPDATE', @comment, @workerIp
             FROM dbo.tblStripMap
             WHERE stripNo = @stripNo AND process = @process AND active = 1;
 
@@ -114,10 +114,10 @@ BEGIN
 
             -- ③ 신규행 재입력 (History에서 불변 필드 참조, lotNo만 새값 사용)
             INSERT dbo.tblStripMap
-            (active, [lock], stripNo, [version], process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos)
+            (active, [lock], stripNo, [version], process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5)
             SELECT 1, [lock], @stripNo, @newStripVersion, process, machineId, @lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray,
                    createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode,
-                   unitIdList, changedXpos, changedYpos
+                   unitIdList, spare3, spare4, spare5
             FROM dbo.tblStripMapHistory
             WHERE timekey = @timekey;
         END
@@ -130,8 +130,8 @@ BEGIN
         BEGIN
             -- History 기록
             INSERT dbo.tblStripMapHistory
-            (timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos, workerId, actionType, comment, workerIp)
-            SELECT @timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos, @workerId, 'DELETE', @comment, @workerIp
+            (timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5, changedXpos, changedYpos, workerId, actionType, comment, workerIp)
+            SELECT @timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5, NULL, NULL, @workerId, 'DELETE', @comment, @workerIp
             FROM dbo.tblStripMap
             WHERE stripNo = @stripNo AND process = @process AND active = 1;
 
@@ -159,8 +159,8 @@ BEGIN
 
             -- ① 삭제 전 History 감사 입력 기록 (actionType='STRIP_PURGE' → 'Q'로 복원 가능)
             INSERT dbo.tblStripMapHistory
-            (timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos, workerId, actionType, comment, workerIp)
-            SELECT @timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos, @workerId, 'STRIP_PURGE', @comment, @workerIp
+            (timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5, changedXpos, changedYpos, workerId, actionType, comment, workerIp)
+            SELECT @timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5, NULL, NULL, @workerId, 'STRIP_PURGE', @comment, @workerIp
             FROM dbo.tblStripMap
             WHERE stripNo = @stripNo AND process = @process AND [version] = @targetVersion;
 
@@ -196,17 +196,17 @@ BEGIN
 
             -- ③ History 데이터로 신규 active=1 재입력 (원본 버전 그대로 복원)
             INSERT dbo.tblStripMap
-            (active, [lock], stripNo, [version], process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos)
+            (active, [lock], stripNo, [version], process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5)
             SELECT 1, [lock], @stripNo, @newStripVersion, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray,
                    createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode,
-                   unitIdList, changedXpos, changedYpos
+                   unitIdList, spare3, spare4, spare5
             FROM dbo.tblStripMapHistory
             WHERE stripNo = @stripNo AND process = @process AND timekey = @targetTimekey;
 
             -- ④ ROLLBACK 감사 입력 기록 (복원 후 상태)
             INSERT dbo.tblStripMapHistory
-            (timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos, workerId, actionType, comment, workerIp)
-            SELECT @timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos, @workerId, 'ROLLBACK', @comment, @workerIp
+            (timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5, changedXpos, changedYpos, workerId, actionType, comment, workerIp)
+            SELECT @timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5, NULL, NULL, @workerId, 'ROLLBACK', @comment, @workerIp
             FROM dbo.tblStripMap
             WHERE stripNo = @stripNo AND process = @process AND active = 1;
         END
@@ -242,17 +242,17 @@ BEGIN
 
             -- ③ STRIP_PURGE 입력의 원본 active 값으로 복원 (hardcoded 1 대신 원본값)
             INSERT dbo.tblStripMap
-            (active, [lock], stripNo, [version], process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos)
+            (active, [lock], stripNo, [version], process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5)
             SELECT active, [lock], @stripNo, @newStripVersion, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray,
                    createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode,
-                   unitIdList, changedXpos, changedYpos
+                   unitIdList, spare3, spare4, spare5
             FROM dbo.tblStripMapHistory
             WHERE stripNo = @stripNo AND process = @process AND timekey = @targetTimekey AND actionType = 'STRIP_PURGE';
 
             -- ④ PURGE_ROLLBACK 감사 입력 기록 (복원한 version 기준)
             INSERT dbo.tblStripMapHistory
-            (timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos, workerId, actionType, comment, workerIp)
-            SELECT @timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, changedXpos, changedYpos, @workerId, 'PURGE_ROLLBACK', @comment, @workerIp
+            (timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5, changedXpos, changedYpos, workerId, actionType, comment, workerIp)
+            SELECT @timekey, [version], active, [lock], stripNo, process, machineId, lotNo, blockNo, originLocation, rowCnt, colCnt, mapArray, createdTime, userId, createdPgm, mgzRf, pcbLotNo, erpCode, quantity, mfgDate, expDate, bincode, unitIdList, spare3, spare4, spare5, NULL, NULL, @workerId, 'PURGE_ROLLBACK', @comment, @workerIp
             FROM dbo.tblStripMap
             WHERE stripNo = @stripNo AND process = @process AND [version] = @newStripVersion;
         END
