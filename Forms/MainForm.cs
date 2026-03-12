@@ -872,6 +872,7 @@ namespace stripMap_Editor.Forms
             SELECT
                 stripNo,
                 process,
+                lotNo,
                 mapArray,
                 bincode,
                 colCnt,
