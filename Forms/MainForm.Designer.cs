@@ -46,6 +46,7 @@ namespace stripMap_Editor.Forms
             this.tabPageMapArray = new System.Windows.Forms.TabPage();
             this.pictureBox_MapArray_Logo = new System.Windows.Forms.PictureBox();
             this.panel2_MapArray_BorderMask = new System.Windows.Forms.Panel();
+            this.panel_MapArray_BorderMask = new System.Windows.Forms.Panel();
             this.labelResultTitleMapArray = new System.Windows.Forms.Label();
             this.panelInputMapArray = new System.Windows.Forms.Panel();
             this.labelMapArrayInput = new System.Windows.Forms.Label();
@@ -53,7 +54,6 @@ namespace stripMap_Editor.Forms
             this.labelBinCodeInput = new System.Windows.Forms.Label();
             this.textBoxBinCode = new System.Windows.Forms.TextBox();
             this.panelResult_MapArray = new System.Windows.Forms.Panel();
-            this.panel_MapArray_BorderMask = new System.Windows.Forms.Panel();
             this.listViewResult_MapArray = new System.Windows.Forms.ListView();
             this.columnHeaderMapArrayCheck = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderMapArray1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -68,8 +68,8 @@ namespace stripMap_Editor.Forms
             this.labelPCBId_MapArray = new System.Windows.Forms.Label();
             this.panelMapGrid = new System.Windows.Forms.Panel();
             this.btnGridOriginal = new System.Windows.Forms.Button();
-            this.btnGridPreview  = new System.Windows.Forms.Button();
-            this.btnRefreshGrid  = new System.Windows.Forms.Button();
+            this.btnGridPreview = new System.Windows.Forms.Button();
+            this.btnRefreshGrid = new System.Windows.Forms.Button();
             this.checkBoxVFlip = new System.Windows.Forms.CheckBox();
             this.checkBoxHFlip = new System.Windows.Forms.CheckBox();
             this.richTextBoxGrid = new System.Windows.Forms.RichTextBox();
@@ -399,6 +399,14 @@ namespace stripMap_Editor.Forms
             this.panel2_MapArray_BorderMask.Size = new System.Drawing.Size(221, 2);
             this.panel2_MapArray_BorderMask.TabIndex = 8;
             // 
+            // panel_MapArray_BorderMask
+            // 
+            this.panel_MapArray_BorderMask.BackColor = System.Drawing.Color.CornflowerBlue;
+            this.panel_MapArray_BorderMask.Location = new System.Drawing.Point(221, 0);
+            this.panel_MapArray_BorderMask.Name = "panel_MapArray_BorderMask";
+            this.panel_MapArray_BorderMask.Size = new System.Drawing.Size(806, 2);
+            this.panel_MapArray_BorderMask.TabIndex = 8;
+            // 
             // labelResultTitleMapArray
             // 
             this.labelResultTitleMapArray.AutoSize = true;
@@ -468,14 +476,6 @@ namespace stripMap_Editor.Forms
             this.panelResult_MapArray.Name = "panelResult_MapArray";
             this.panelResult_MapArray.Size = new System.Drawing.Size(1037, 106);
             this.panelResult_MapArray.TabIndex = 1;
-            // 
-            // panel_MapArray_BorderMask
-            // 
-            this.panel_MapArray_BorderMask.BackColor = System.Drawing.Color.CornflowerBlue;
-            this.panel_MapArray_BorderMask.Location = new System.Drawing.Point(221, 0);
-            this.panel_MapArray_BorderMask.Name = "panel_MapArray_BorderMask";
-            this.panel_MapArray_BorderMask.Size = new System.Drawing.Size(806, 2);
-            this.panel_MapArray_BorderMask.TabIndex = 8;
             // 
             // listViewResult_MapArray
             // 
@@ -620,6 +620,43 @@ namespace stripMap_Editor.Forms
             this.panelMapGrid.Size = new System.Drawing.Size(511, 175);
             this.panelMapGrid.TabIndex = 10;
             // 
+            // btnGridOriginal
+            // 
+            this.btnGridOriginal.BackColor = System.Drawing.Color.CornflowerBlue;
+            this.btnGridOriginal.FlatAppearance.BorderSize = 0;
+            this.btnGridOriginal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnGridOriginal.Font = new System.Drawing.Font("맑은 고딕", 9F);
+            this.btnGridOriginal.ForeColor = System.Drawing.Color.White;
+            this.btnGridOriginal.Location = new System.Drawing.Point(10, 8);
+            this.btnGridOriginal.Name = "btnGridOriginal";
+            this.btnGridOriginal.Size = new System.Drawing.Size(50, 22);
+            this.btnGridOriginal.TabIndex = 4;
+            this.btnGridOriginal.Text = "기존";
+            this.btnGridOriginal.UseVisualStyleBackColor = false;
+            // 
+            // btnGridPreview
+            // 
+            this.btnGridPreview.Enabled = false;
+            this.btnGridPreview.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnGridPreview.Font = new System.Drawing.Font("맑은 고딕", 9F);
+            this.btnGridPreview.Location = new System.Drawing.Point(63, 8);
+            this.btnGridPreview.Name = "btnGridPreview";
+            this.btnGridPreview.Size = new System.Drawing.Size(65, 22);
+            this.btnGridPreview.TabIndex = 5;
+            this.btnGridPreview.Text = "미리보기";
+            this.btnGridPreview.UseVisualStyleBackColor = true;
+            // 
+            // btnRefreshGrid
+            // 
+            this.btnRefreshGrid.Enabled = false;
+            this.btnRefreshGrid.Font = new System.Drawing.Font("맑은 고딕", 9F);
+            this.btnRefreshGrid.Location = new System.Drawing.Point(398, 8);
+            this.btnRefreshGrid.Name = "btnRefreshGrid";
+            this.btnRefreshGrid.Size = new System.Drawing.Size(95, 22);
+            this.btnRefreshGrid.TabIndex = 6;
+            this.btnRefreshGrid.Text = "새로고침 ↺";
+            this.btnRefreshGrid.UseVisualStyleBackColor = true;
+            // 
             // checkBoxVFlip
             // 
             this.checkBoxVFlip.AutoSize = true;
@@ -652,47 +689,7 @@ namespace stripMap_Editor.Forms
             this.richTextBoxGrid.TabIndex = 3;
             this.richTextBoxGrid.Text = "";
             this.richTextBoxGrid.WordWrap = false;
-            //
-            // btnGridOriginal
-            //
-            this.btnGridOriginal.BackColor = System.Drawing.Color.CornflowerBlue;
-            this.btnGridOriginal.FlatAppearance.BorderSize = 0;
-            this.btnGridOriginal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnGridOriginal.Font = new System.Drawing.Font("맑은 고딕", 9F);
-            this.btnGridOriginal.ForeColor = System.Drawing.Color.White;
-            this.btnGridOriginal.Location = new System.Drawing.Point(10, 8);
-            this.btnGridOriginal.Name = "btnGridOriginal";
-            this.btnGridOriginal.Size = new System.Drawing.Size(50, 22);
-            this.btnGridOriginal.TabIndex = 4;
-            this.btnGridOriginal.Text = "기존";
-            this.btnGridOriginal.UseVisualStyleBackColor = false;
-
-            //
-            // btnGridPreview
-            //
-            this.btnGridPreview.FlatAppearance.BorderSize = 1;
-            this.btnGridPreview.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnGridPreview.Font = new System.Drawing.Font("맑은 고딕", 9F);
-            this.btnGridPreview.Location = new System.Drawing.Point(63, 8);
-            this.btnGridPreview.Name = "btnGridPreview";
-            this.btnGridPreview.Size = new System.Drawing.Size(65, 22);
-            this.btnGridPreview.TabIndex = 5;
-            this.btnGridPreview.Text = "미리보기";
-            this.btnGridPreview.Enabled = false;
-            this.btnGridPreview.UseVisualStyleBackColor = true;
-
-            //
-            // btnRefreshGrid
-            //
-            this.btnRefreshGrid.Enabled = false;
-            this.btnRefreshGrid.Font = new System.Drawing.Font("맑은 고딕", 9F);
-            this.btnRefreshGrid.Location = new System.Drawing.Point(398, 8);
-            this.btnRefreshGrid.Name = "btnRefreshGrid";
-            this.btnRefreshGrid.Size = new System.Drawing.Size(95, 22);
-            this.btnRefreshGrid.TabIndex = 6;
-            this.btnRefreshGrid.Text = "새로고침 ↺";
-            this.btnRefreshGrid.UseVisualStyleBackColor = true;
-            //
+            // 
             // btnUpdate_MapArray
             // 
             this.btnUpdate_MapArray.BackColor = System.Drawing.Color.CornflowerBlue;
@@ -711,7 +708,7 @@ namespace stripMap_Editor.Forms
             // 
             // btnDelete_MapArray
             // 
-            this.btnDelete_MapArray.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(53)))), ((int)(((byte)(69)))));
+            this.btnDelete_MapArray.BackColor = System.Drawing.Color.Firebrick;
             this.btnDelete_MapArray.BorderRadius = 25;
             this.btnDelete_MapArray.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnDelete_MapArray.FlatAppearance.BorderSize = 0;
@@ -960,7 +957,7 @@ namespace stripMap_Editor.Forms
             // 
             // btnPurgeRollback_PCB
             // 
-            this.btnPurgeRollback_PCB.BackColor = System.Drawing.Color.DarkOrange;
+            this.btnPurgeRollback_PCB.BackColor = System.Drawing.Color.Firebrick;
             this.btnPurgeRollback_PCB.BorderRadius = 25;
             this.btnPurgeRollback_PCB.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnPurgeRollback_PCB.FlatAppearance.BorderSize = 0;
@@ -976,7 +973,7 @@ namespace stripMap_Editor.Forms
             // 
             // btnRestore_PCB
             // 
-            this.btnRestore_PCB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(53)))), ((int)(((byte)(69)))));
+            this.btnRestore_PCB.BackColor = System.Drawing.Color.CornflowerBlue;
             this.btnRestore_PCB.BorderRadius = 25;
             this.btnRestore_PCB.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnRestore_PCB.FlatAppearance.BorderSize = 0;
@@ -1021,6 +1018,7 @@ namespace stripMap_Editor.Forms
             this.panelMapGrid.ResumeLayout(false);
             this.panelMapGrid.PerformLayout();
             this.tabPagePcbRestore.ResumeLayout(false);
+            this.tabPagePcbRestore.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_PCB_Logo)).EndInit();
             this.panelResult_PCB.ResumeLayout(false);
             this.panelSearch.ResumeLayout(false);
