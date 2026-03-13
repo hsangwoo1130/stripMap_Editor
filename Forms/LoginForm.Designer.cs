@@ -26,6 +26,7 @@ namespace stripMap_Editor.Forms
         {
             this.panelMain = new System.Windows.Forms.Panel();
             this.btnLogin = new System.Windows.Forms.Button();
+            this.checkBox_RvSend = new System.Windows.Forms.CheckBox();
             this.textBoxPassword = new System.Windows.Forms.TextBox();
             this.labelPassword = new System.Windows.Forms.Label();
             this.textBoxUserId = new System.Windows.Forms.TextBox();
@@ -41,6 +42,7 @@ namespace stripMap_Editor.Forms
             this.panelMain.BackColor = System.Drawing.Color.White;
             this.panelMain.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelMain.Controls.Add(this.btnLogin);
+            this.panelMain.Controls.Add(this.checkBox_RvSend);
             this.panelMain.Controls.Add(this.textBoxPassword);
             this.panelMain.Controls.Add(this.labelPassword);
             this.panelMain.Controls.Add(this.textBoxUserId);
@@ -49,7 +51,7 @@ namespace stripMap_Editor.Forms
             this.panelMain.Controls.Add(this.pictureBox_Login_Logo);
             this.panelMain.Location = new System.Drawing.Point(12, 12);
             this.panelMain.Name = "panelMain";
-            this.panelMain.Size = new System.Drawing.Size(376, 326);
+            this.panelMain.Size = new System.Drawing.Size(376, 360);
             this.panelMain.TabIndex = 0;
             // 
             // btnLogin
@@ -60,14 +62,27 @@ namespace stripMap_Editor.Forms
             this.btnLogin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLogin.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btnLogin.ForeColor = System.Drawing.Color.White;
-            this.btnLogin.Location = new System.Drawing.Point(138, 240);
+            this.btnLogin.Location = new System.Drawing.Point(138, 280);
             this.btnLogin.Name = "btnLogin";
             this.btnLogin.Size = new System.Drawing.Size(100, 45);
             this.btnLogin.TabIndex = 2;
             this.btnLogin.Text = "로그인";
             this.btnLogin.UseVisualStyleBackColor = false;
             this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
-            // 
+            //
+            // checkBox_RvSend
+            //
+            this.checkBox_RvSend.AutoSize = true;
+            this.checkBox_RvSend.Checked = true;
+            this.checkBox_RvSend.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_RvSend.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.checkBox_RvSend.Location = new System.Drawing.Point(120, 228);
+            this.checkBox_RvSend.Name = "checkBox_RvSend";
+            this.checkBox_RvSend.Size = new System.Drawing.Size(110, 21);
+            this.checkBox_RvSend.TabIndex = 3;
+            this.checkBox_RvSend.Text = "RV 메시지 전송";
+            this.checkBox_RvSend.UseVisualStyleBackColor = true;
+            //
             // textBoxPassword
             // 
             this.textBoxPassword.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
@@ -133,7 +148,7 @@ namespace stripMap_Editor.Forms
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.ClientSize = new System.Drawing.Size(400, 350);
+            this.ClientSize = new System.Drawing.Size(400, 384);
             this.Controls.Add(this.panelMain);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -158,5 +173,6 @@ namespace stripMap_Editor.Forms
         private Label labelPassword;
         private TextBox textBoxPassword;
         private Button btnLogin;
+        private CheckBox checkBox_RvSend;
     }
 }

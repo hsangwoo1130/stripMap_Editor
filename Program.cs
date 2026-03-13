@@ -28,7 +28,7 @@ namespace StripMapEditor
 
             if (loginForm.ShowDialog() == DialogResult.OK)
             {
-                RvManager rv = CreateRvManager();
+                RvManager rv = CreateRvManager(loginForm.RvSendEnabled);
                 if (rv == null) return;
 
                 using (rv)
@@ -75,36 +75,31 @@ namespace StripMapEditor
         /// config.ini [RV] 섹션을 읽어 RvManager를 생성하고 초기화합니다.
         /// Service/Network/Daemon/Subject 중 하나라도 비어 있으면 RV 기능을 비활성화합니다.
         /// </summary>
-        private static RvManager CreateRvManager()
+        private static RvManager CreateRvManager(bool rvSendEnabled)
         {
             string iniPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.ini");
             var ini = new IniFileHelper(iniPath);
 
-            string service    = ini.Read("RV", "Service",    "");
-            string network    = ini.Read("RV", "Network",    "");
-            string daemon     = ini.Read("RV", "Daemon",     "");
-            string subject    = ini.Read("RV", "Subject",    "");
+            string service = ini.Read("RV", "Service", "");
+            string network = ini.Read("RV", "Network", "");
+            string daemon  = ini.Read("RV", "Daemon",  "");
+            string subject = ini.Read("RV", "Subject", "");
             var rv = new RvManager
             {
-                Service = service,
-                Network = network,
-                Daemon  = daemon,
-                Subject = subject,
-#if DEBUG
-                SimulationMode = ini.Read("RV", "Simulation", "false")
-                                    .Equals("true", StringComparison.OrdinalIgnoreCase)
-#endif
+                Service        = service,
+                Network        = network,
+                Daemon         = daemon,
+                Subject        = subject,
+                SimulationMode = !rvSendEnabled
             };
 
-#if DEBUG
-            if (rv.SimulationMode)
+            if (!rvSendEnabled)
             {
                 AppLogger.Info("[RV] 시뮬레이션 모드 — 실제 TIBCO 연결 없이 로그만 기록합니다.");
                 rv.RvInit();
                 rv.RvConnect();
                 return rv;
             }
-#endif
 
             if (string.IsNullOrWhiteSpace(service)
                 || string.IsNullOrWhiteSpace(daemon) || string.IsNullOrWhiteSpace(subject))

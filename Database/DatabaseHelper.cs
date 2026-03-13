@@ -51,9 +51,6 @@ namespace StripMapEditor.Database
             _iniFile.Write("RV", "Network",    "");
             _iniFile.Write("RV", "Daemon",     "");
             _iniFile.Write("RV", "Subject",    "");
-#if DEBUG
-            _iniFile.Write("RV", "Simulation", "false");
-#endif
         }
 
         /// <summary>

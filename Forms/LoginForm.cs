@@ -19,6 +19,12 @@ namespace stripMap_Editor.Forms
         public string LoggedInUserName { get; private set; }
         public string LoggedInUserRole { get; private set; }
 
+        /// <summary>
+        /// 로그인 폼의 "RV 메시지 전송" 체크박스 상태.
+        /// false이면 Program.cs에서 SimulationMode=true로 설정하여 RV 연결을 건너뜁니다.
+        /// </summary>
+        public bool RvSendEnabled => checkBox_RvSend.Checked;
+
         private Bitmap _logoBitmap;
 
         public LoginForm()

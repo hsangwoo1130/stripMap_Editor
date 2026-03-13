@@ -18,13 +18,11 @@ namespace StripMapEditor.Utils
         public string Daemon         { get; set; }
         public string Subject        { get; set; }
 
-#if DEBUG
         /// <summary>
-        /// 시뮬레이션 모드 (true: TIBCO 없이 로그만 기록 — 테스트 용도)
-        /// config.ini [RV] Simulation=true 로 활성화 / Debug 빌드 전용
+        /// 시뮬레이션 모드 (true: TIBCO 없이 로그만 기록)
+        /// LoginForm의 "RV 메시지 전송" 체크박스 미체크 시 Program.cs에서 true로 설정
         /// </summary>
         public bool SimulationMode { get; set; } = false;
-#endif
 
         // ─────────────────────────────────────────────
         // RV 내부 객체
@@ -49,14 +47,13 @@ namespace StripMapEditor.Utils
         /// </summary>
         public bool RvInit()
         {
-#if DEBUG
             if (SimulationMode)
             {
                 _isInitialized = true;
                 Log.Information("[RV_SIM] 시뮬레이션 모드 — TIBCO 초기화 건너뜀");
                 return true;
             }
-#endif
+
             try
             {
                 TIBCO.Rendezvous.Environment.Open();
@@ -87,14 +84,13 @@ namespace StripMapEditor.Utils
         /// </summary>
         public bool RvConnect()
         {
-#if DEBUG
             if (SimulationMode)
             {
                 IsConnected = true;
                 Log.Information($"[RV_SIM] 시뮬레이션 모드 — 연결 건너뜀. Subject={Subject}");
                 return true;
             }
-#endif
+
             try
             {
                 RvDestroyTransport();
@@ -136,13 +132,12 @@ namespace StripMapEditor.Utils
                 return;
             }
 
-#if DEBUG
             if (SimulationMode)
             {
                 Log.Information($"[RV_SIM] 전송 시뮬레이션 TO:{subject} / DATA={msgData}");
                 return;
             }
-#endif
+
             if (_transport == null)
             {
                 Log.Warning("[RV] 메시지를 보낼 수 없습니다. Transport가 없습니다.");
@@ -181,25 +176,17 @@ namespace StripMapEditor.Utils
         /// </summary>
         public void RvTerminate()
         {
-#if DEBUG
             if (!SimulationMode)
                 RvDestroyTransport();
             else
                 IsConnected = false;
-#else
-            RvDestroyTransport();
-#endif
+
             _rvMsg      = null;
             _queue      = null;
             _queueGroup = null;
 
-#if DEBUG
             if (_isInitialized && !SimulationMode)
                 TIBCO.Rendezvous.Environment.Close();
-#else
-            if (_isInitialized)
-                TIBCO.Rendezvous.Environment.Close();
-#endif
 
             _isInitialized = false;
 
