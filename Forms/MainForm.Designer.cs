@@ -976,7 +976,7 @@ namespace stripMap_Editor.Forms
             // 
             // btnRestore_PCB
             // 
-            this.btnRestore_PCB.BackColor = System.Drawing.Color.CornflowerBlue;
+            this.btnRestore_PCB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(53)))), ((int)(((byte)(69)))));
             this.btnRestore_PCB.BorderRadius = 25;
             this.btnRestore_PCB.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnRestore_PCB.FlatAppearance.BorderSize = 0;

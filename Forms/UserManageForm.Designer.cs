@@ -148,7 +148,7 @@ namespace stripMap_Editor.Forms
             this.comboBoxRoleReg.TabIndex      = 4;
 
             // btnRegister
-            this.btnRegister.BackColor              = System.Drawing.Color.CornflowerBlue;
+            this.btnRegister.BackColor              = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(53)))), ((int)(((byte)(69)))));
             this.btnRegister.Cursor                 = System.Windows.Forms.Cursors.Hand;
             this.btnRegister.FlatAppearance.BorderSize = 0;
             this.btnRegister.FlatStyle             = System.Windows.Forms.FlatStyle.Flat;
@@ -285,7 +285,7 @@ namespace stripMap_Editor.Forms
             this.comboBoxIsActive.TabIndex      = 4;
 
             // btnUpdate
-            this.btnUpdate.BackColor              = System.Drawing.Color.SeaGreen;
+            this.btnUpdate.BackColor              = System.Drawing.Color.CornflowerBlue;
             this.btnUpdate.Cursor                 = System.Windows.Forms.Cursors.Hand;
             this.btnUpdate.FlatAppearance.BorderSize = 0;
             this.btnUpdate.FlatStyle             = System.Windows.Forms.FlatStyle.Flat;
