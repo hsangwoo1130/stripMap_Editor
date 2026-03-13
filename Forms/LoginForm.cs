@@ -88,17 +88,17 @@ namespace stripMap_Editor.Forms
         {
             try
             {
-                // tblUser + tblUserRole + tblRole JOIN 조회 (isActive 체크 포함)
+                // tblUser + tblUserRole + tblRole JOIN 조회 (isActive 필터 없음 — 비밀번호 검증 후 체크)
                 string query = @"
                     SELECT u.userId,
                            u.userName,
                            u.passwordHash,
+                           u.isActive,
                            r.roleId
                     FROM   dbo.tblUser     u
                     INNER  JOIN dbo.tblUserRole ur ON u.userId = ur.userId
                     INNER  JOIN dbo.tblRole      r  ON ur.roleId = r.roleId
-                    WHERE  u.userId   = @userId
-                      AND  u.isActive = 1";
+                    WHERE  u.userId = @userId";
 
                 var parameters = new SqlParameter[]
                 {
@@ -107,7 +107,7 @@ namespace stripMap_Editor.Forms
 
                 DataTable result = DatabaseHelper.ExecuteQuery(query, parameters);
 
-                // 사용자 없음 또는 비활성 계정
+                // 존재하지 않는 아이디
                 if (result.Rows.Count == 0)
                 {
                     ShowLoginFailed();
@@ -119,6 +119,15 @@ namespace stripMap_Editor.Forms
                 if (!VerifyPassword(password, storedHash))
                 {
                     ShowLoginFailed();
+                    return false;
+                }
+
+                // 비밀번호 일치 후 isActive 체크
+                bool isActive = Convert.ToInt32(result.Rows[0]["isActive"]) == 1;
+                if (!isActive)
+                {
+                    MessageBox.Show("접근이 제한된 계정입니다.", "로그인 실패",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return false;
                 }
 

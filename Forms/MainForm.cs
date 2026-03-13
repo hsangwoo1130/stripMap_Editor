@@ -28,7 +28,8 @@ namespace stripMap_Editor.Forms
 
         // 관리자 탭 (동적 생성)
         private TabPage _tabPageAdmin;
-        private TabPage _prevTabPage;   // 관리자 탭 클릭 직전에 보던 탭
+        private TabPage _tabPageUserManage; // 사용자 관리 탭 (SUPER 전용)
+        private TabPage _prevTabPage;       // 특수 탭 클릭 직전에 보던 탭
         
         // 사용자 권한 관련
         private UserRole currentUserRole = UserRole.USER;
@@ -98,23 +99,26 @@ namespace stripMap_Editor.Forms
         /// </summary>
         private void ApplyUserPermissions()
         {
-            tabPageLotId.Parent      = _userMenus.Contains(MenuIds.STRIP_EDIT) ? tabControl_Strip : null;
-            tabPageMapArray.Parent   = _userMenus.Contains(MenuIds.MAP_EDIT)   ? tabControl_Strip : null;
-            tabPagePcbRestore.Parent = _userMenus.Contains(MenuIds.STRIP_HIST) ? tabControl_Strip : null;
-            _tabPageAdmin.Parent     = _userMenus.Contains(MenuIds.PURGE)      ? tabControl_Strip : null;
+            tabPageLotId.Parent         = _userMenus.Contains(MenuIds.STRIP_EDIT)   ? tabControl_Strip : null;
+            tabPageMapArray.Parent      = _userMenus.Contains(MenuIds.MAP_EDIT)     ? tabControl_Strip : null;
+            tabPagePcbRestore.Parent    = _userMenus.Contains(MenuIds.STRIP_HIST)   ? tabControl_Strip : null;
+            _tabPageAdmin.Parent        = _userMenus.Contains(MenuIds.PURGE)        ? tabControl_Strip : null;
+            _tabPageUserManage.Parent   = _userMenus.Contains(MenuIds.USER_MANAGE)  ? tabControl_Strip : null;
 
             // tblMenu.menuName으로 탭 텍스트 동적 설정
-            tabPageLotId.Text      = GetMenuName(MenuIds.STRIP_EDIT, tabPageLotId.Text);
-            tabPageMapArray.Text   = GetMenuName(MenuIds.MAP_EDIT,   tabPageMapArray.Text);
-            tabPagePcbRestore.Text = GetMenuName(MenuIds.STRIP_HIST, tabPagePcbRestore.Text);
-            _tabPageAdmin.Text     = " " + GetMenuName(MenuIds.PURGE, _tabPageAdmin.Text) + " ";
+            tabPageLotId.Text          = GetMenuName(MenuIds.STRIP_EDIT,  tabPageLotId.Text);
+            tabPageMapArray.Text       = GetMenuName(MenuIds.MAP_EDIT,    tabPageMapArray.Text);
+            tabPagePcbRestore.Text     = GetMenuName(MenuIds.STRIP_HIST,  tabPagePcbRestore.Text);
+            _tabPageAdmin.Text         = " " + GetMenuName(MenuIds.PURGE,        _tabPageAdmin.Text)      + " ";
+            _tabPageUserManage.Text    = " " + GetMenuName(MenuIds.USER_MANAGE,  _tabPageUserManage.Text) + " ";
 
             // menuUrl → TabPage 매핑 구성
             _menuUrlMap.Clear();
-            RegisterMenuUrl(MenuIds.STRIP_EDIT, tabPageLotId);
-            RegisterMenuUrl(MenuIds.MAP_EDIT,   tabPageMapArray);
-            RegisterMenuUrl(MenuIds.STRIP_HIST, tabPagePcbRestore);
-            RegisterMenuUrl(MenuIds.PURGE,      _tabPageAdmin);
+            RegisterMenuUrl(MenuIds.STRIP_EDIT,  tabPageLotId);
+            RegisterMenuUrl(MenuIds.MAP_EDIT,    tabPageMapArray);
+            RegisterMenuUrl(MenuIds.STRIP_HIST,  tabPagePcbRestore);
+            RegisterMenuUrl(MenuIds.PURGE,       _tabPageAdmin);
+            RegisterMenuUrl(MenuIds.USER_MANAGE, _tabPageUserManage);
 
             if (tabControl_Strip.TabCount > 0)
                 tabControl_Strip.SelectedIndex = 0;
@@ -142,8 +146,8 @@ namespace stripMap_Editor.Forms
         }
 
         /// <summary>
-        /// Purge 탭 동적 생성 — 탭 클릭 시 AdminForm 모달 팝업
-        /// tblRoleMenu PURGE 메뉴 권한이 있는 경우에만 표시 (ApplyUserPermissions에서 제어)
+        /// Purge 탭 / 사용자 관리 탭 동적 생성 — 탭 클릭 시 각 모달 팝업
+        /// tblRoleMenu 권한에 따라 ApplyUserPermissions에서 표시 여부 제어
         /// </summary>
         private void SetupAdminTab()
         {
@@ -154,35 +158,68 @@ namespace stripMap_Editor.Forms
                 Cursor    = Cursors.Hand,
                 Font      = new Font("맑은 고딕", 9.75f, FontStyle.Bold, GraphicsUnit.Point, 129)
             };
+            _tabPageUserManage = new TabPage
+            {
+                Text      = "⚙ 사용자 관리",
+                BackColor = Color.FromArgb(240, 240, 240),
+                Cursor    = Cursors.Hand,
+                Font      = new Font("맑은 고딕", 9.75f, FontStyle.Bold, GraphicsUnit.Point, 129)
+            };
             tabControl_Strip.SelectedIndexChanged += TabControl_SelectedIndexChanged;
         }
 
         private void TabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (_tabPageAdmin == null || tabControl_Strip.SelectedTab != _tabPageAdmin)
+            var selected = tabControl_Strip.SelectedTab;
+
+            bool isAdminTab      = (_tabPageAdmin      != null && selected == _tabPageAdmin);
+            bool isUserManageTab = (_tabPageUserManage != null && selected == _tabPageUserManage);
+
+            if (!isAdminTab && !isUserManageTab)
             {
-                // 관리자 탭이 아닐 때 → 현재 탭을 기억
-                _prevTabPage = tabControl_Strip.SelectedTab;
+                // 일반 탭 → 현재 탭을 기억
+                _prevTabPage = selected;
                 return;
             }
 
-            // 관리자 탭 클릭 → 보던 탭으로 복원 후 AdminForm 팝업
-            if (_prevTabPage != null && tabControl_Strip.TabPages.Contains(_prevTabPage))
-                tabControl_Strip.SelectedTab = _prevTabPage;
-            else
+            // 특수 탭 클릭 → 보던 탭으로 복원
+            RestorePrevTab();
+
+            if (isAdminTab)
             {
-                for (int i = 0; i < tabControl_Strip.TabCount; i++)
+                using (var adminForm = new AdminForm(currentUserId, LoggedInUserRole, _userPermissions, Rv))
+                    adminForm.ShowDialog(this);
+            }
+            else if (isUserManageTab)
+            {
+                // SUPER 이중 체크
+                if (LoggedInUserRole != "SUPER")
                 {
-                    if (tabControl_Strip.TabPages[i] != _tabPageAdmin)
-                    {
-                        tabControl_Strip.SelectedIndex = i;
-                        break;
-                    }
+                    MessageBox.Show("SUPER 권한만 접근할 수 있습니다.", "권한 없음",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                using (var userManageForm = new UserManageForm(currentUserId, LoggedInUserName))
+                    userManageForm.ShowDialog(this);
+            }
+        }
+
+        private void RestorePrevTab()
+        {
+            if (_prevTabPage != null && tabControl_Strip.TabPages.Contains(_prevTabPage))
+            {
+                tabControl_Strip.SelectedTab = _prevTabPage;
+                return;
+            }
+            for (int i = 0; i < tabControl_Strip.TabCount; i++)
+            {
+                var t = tabControl_Strip.TabPages[i];
+                if (t != _tabPageAdmin && t != _tabPageUserManage)
+                {
+                    tabControl_Strip.SelectedIndex = i;
+                    break;
                 }
             }
-
-            using (var adminForm = new AdminForm(currentUserId, LoggedInUserRole, _userPermissions, Rv))
-                adminForm.ShowDialog(this);
         }
 
         /// <summary>
