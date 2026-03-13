@@ -706,7 +706,7 @@ namespace stripMap_Editor.Forms
             this.btnUpdate_MapArray.Name = "btnUpdate_MapArray";
             this.btnUpdate_MapArray.Size = new System.Drawing.Size(110, 55);
             this.btnUpdate_MapArray.TabIndex = 7;
-            this.btnUpdate_MapArray.Text = " 수정 ⚙️";
+            this.btnUpdate_MapArray.Text = " 확인 ⚙️";
             this.btnUpdate_MapArray.UseVisualStyleBackColor = false;
             // 
             // btnDelete_MapArray

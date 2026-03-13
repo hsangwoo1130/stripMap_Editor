@@ -1166,6 +1166,25 @@ namespace stripMap_Editor.Forms
                 DrawGrid(_currentMapArray, _currentColCnt, _currentRowCnt,
                          checkBoxVFlip.Checked, checkBoxHFlip.Checked);
             }
+
+            // 실시간 자동변환: MapArray 자릿수가 '2'인 위치 → BinCode 'D'로 교체
+            string newMapArray = textBoxMapArray.Text;
+            string binCode     = textBoxBinCode.Text;
+            if (newMapArray.Length > 0 && newMapArray.Length == binCode.Length)
+            {
+                char[] binChars = binCode.ToCharArray();
+                bool changed = false;
+                for (int i = 0; i < newMapArray.Length; i++)
+                {
+                    if (newMapArray[i] == '2' && binChars[i] != 'D')
+                    {
+                        binChars[i] = 'D';
+                        changed = true;
+                    }
+                }
+                if (changed)
+                    textBoxBinCode.Text = new string(binChars);
+            }
         }
 
         private void ListViewResultMapArrayBinCode_SelectedIndexChanged(object sender, EventArgs e)
@@ -1435,6 +1454,29 @@ namespace stripMap_Editor.Forms
                 }
                 // ── 자릿수 검증 끝 ──
 
+                // ── 변경 없음 체크: MapArray·BinCode 모두 기존 값과 동일하면 수정 불가 ──
+                bool anyMapArrayChanged = false;
+                bool anyBinCodeChanged  = false;
+                foreach (ListViewItem chkItem in checkedItems)
+                {
+                    DataRow chkRow = chkItem.Tag as DataRow;
+                    if (chkRow == null) continue;
+                    if (!string.IsNullOrEmpty(newMapArray)
+                        && newMapArray != (chkRow["mapArray"]?.ToString() ?? ""))
+                        anyMapArrayChanged = true;
+                    if (!string.IsNullOrEmpty(newBinCode)
+                        && newBinCode != (chkRow["bincode"]?.ToString() ?? ""))
+                        anyBinCodeChanged = true;
+                    if (anyMapArrayChanged || anyBinCodeChanged) break;
+                }
+                if (!anyMapArrayChanged && !anyBinCodeChanged)
+                {
+                    MessageBox.Show("변경된 내용이 없습니다.", "알림",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                // ── 변경 없음 체크 끝 ──
+
                 DialogResult result = MessageBox.Show(
                     $"{checkedItems.Count}건의 데이터를 수정하시겠습니까?",
                     "수정 확인",
@@ -1452,7 +1494,47 @@ namespace stripMap_Editor.Forms
                             && firstRow["colCnt"] != DBNull.Value)
                             colCnt = Convert.ToInt32(firstRow["colCnt"]);
                     }
-                    await UpdateMapArrayDataAsync(checkedItems, newMapArray, newBinCode, colCnt);
+
+                    // 아웃라이어 탐지: BinCode='D' 이지만 새 MapArray 해당 자릿수 ≠ '2'
+                    Dictionary<string, string> perRowBinCodes = null;
+                    if (!string.IsNullOrEmpty(newMapArray) && !string.IsNullOrEmpty(newBinCode)
+                        && newMapArray.Length == newBinCode.Length)
+                    {
+                        var outliers = new List<OutlierItem>();
+                        foreach (ListViewItem chkItem in checkedItems)
+                        {
+                            DataRow chkRow = chkItem.Tag as DataRow;
+                            if (chkRow == null) continue;
+                            string stripNo = chkRow["stripNo"]?.ToString() ?? "";
+                            for (int i = 0; i < newMapArray.Length; i++)
+                            {
+                                if (newBinCode[i] == 'D' && newMapArray[i] != '2')
+                                {
+                                    outliers.Add(new OutlierItem
+                                    {
+                                        StripNo      = stripNo,
+                                        Position     = i + 1,
+                                        MapArrayChar = newMapArray[i]
+                                    });
+                                }
+                            }
+                        }
+
+                        if (outliers.Count > 0)
+                        {
+                            using (var dlg = new OutlierReviewDialog(outliers, newBinCode))
+                            {
+                                if (dlg.ShowDialog(this) != DialogResult.OK)
+                                {
+                                    btnUpdate_MapArray.Enabled = true;
+                                    return;
+                                }
+                                perRowBinCodes = dlg.CorrectedBinCodes;
+                            }
+                        }
+                    }
+
+                    await UpdateMapArrayDataAsync(checkedItems, newMapArray, newBinCode, colCnt, perRowBinCodes);
                 }
             }
             catch (Exception ex)
@@ -1470,7 +1552,7 @@ namespace stripMap_Editor.Forms
         /// MapArray 수정 — SP 'U' (usp_StripMap_Process)
         /// SP의 COALESCE(@mapArray, mapArray) 처리: 빈 값이면 NULL 전달 → 기존 값 유지
         /// </summary>
-        private async Task UpdateMapArrayDataAsync(List<ListViewItem> checkedItems, string newMapArray, string newBinCode, int colCnt)
+        private async Task UpdateMapArrayDataAsync(List<ListViewItem> checkedItems, string newMapArray, string newBinCode, int colCnt, Dictionary<string, string> perRowBinCodes = null)
         {
             string workerIp = GetLocalIPAddress();
             string searchStripNo = textBox_PCB_MapArray.Text.Trim();
@@ -1496,8 +1578,13 @@ namespace stripMap_Editor.Forms
                             string lotId   = row["lotNo"]?.ToString() ?? "";
 
                             // 빈 값이면 NULL → SP의 COALESCE가 기존 DB 값 유지
-                            object mapArrayParam = string.IsNullOrEmpty(newMapArray) ? (object)DBNull.Value : newMapArray;
-                            object bincodeParam  = string.IsNullOrEmpty(newBinCode)  ? (object)DBNull.Value : newBinCode;
+                            // perRowBinCodes가 있으면 아웃라이어 보정된 행별 BinCode 사용
+                            string effectiveBinCode = (perRowBinCodes != null
+                                && perRowBinCodes.TryGetValue(stripNo, out string corrected))
+                                ? corrected : newBinCode;
+
+                            object mapArrayParam = string.IsNullOrEmpty(newMapArray)      ? (object)DBNull.Value : newMapArray;
+                            object bincodeParam  = string.IsNullOrEmpty(effectiveBinCode) ? (object)DBNull.Value : effectiveBinCode;
 
                             // 변경 좌표 계산
                             string origMapArray = row["mapArray"]?.ToString() ?? "";
@@ -1526,7 +1613,7 @@ namespace stripMap_Editor.Forms
                                 new SqlParameter("@changedYpos",   (object)yposList ?? DBNull.Value)
                             });
 
-                            AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}] user={currentUserId} | stripNo={stripNo} | mapArray={newMapArray} binCode={newBinCode}");
+                            AppLogger.Info($"[{ActionTypes.STRIP_UPDATE}] user={currentUserId} | stripNo={stripNo} | mapArray={newMapArray} binCode={effectiveBinCode}");
                             for (int i = 0; i < changedCoords.xList.Count; i++)
                                 SendMesRvMessage(stripNo, lotId, "U",
                                                  changedCoords.xList[i], changedCoords.yList[i]);

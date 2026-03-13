@@ -34,7 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -77,9 +77,6 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- TIBCO Rendezvous DLL 경로: x86 = 로컬 TIBCO 설치, x64 = lib\x64\ (운영사 수령 파일) -->
-    <Reference Include="TIBCO.Rendezvous" Condition="'$(Platform)' != 'x64'">
-      <HintPath>C:\TIBCO\TIBRV\bin\TIBCO.Rendezvous.dll</HintPath>
-    </Reference>
     <Reference Include="TIBCO.Rendezvous" Condition="'$(Platform)' == 'x64'">
       <HintPath>lib\x64\TIBCO.Rendezvous.dll</HintPath>
     </Reference>
@@ -139,6 +136,10 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="TIBCO.Rendezvous, Version=1.0.3818.29365, Culture=neutral, PublicKeyToken=1a696d1f90f6158a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\x64\TIBCO.Rendezvous.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Database\DatabaseHelper.cs" />
@@ -159,6 +160,12 @@
     </Compile>
     <Compile Include="Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\OutlierReviewDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\OutlierReviewDialog.Designer.cs">
+      <DependentUpon>OutlierReviewDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -207,6 +214,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\SFA_logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Serilog.4.2.0\build\Serilog.targets" Condition="Exists('packages\Serilog.4.2.0\build\Serilog.targets')" />
