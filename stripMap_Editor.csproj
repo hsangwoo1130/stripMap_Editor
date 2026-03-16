@@ -76,12 +76,18 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <!-- TIBCO Rendezvous DLL 경로: x86 = 로컬 TIBCO 설치, x64 = lib\x64\ (운영사 수령 파일) -->
+    <!-- TIBCO Rendezvous DLL 경로: x86 = lib\x86\ (로컬 복사본), x64 = lib\x64\ (운영사 수령 파일) -->
     <Reference Include="TIBCO.Rendezvous" Condition="'$(Platform)' == 'x64'">
       <HintPath>lib\x64\TIBCO.Rendezvous.dll</HintPath>
     </Reference>
-    <!-- x64 빌드 시 netmodule도 출력 폴더로 복사 -->
+    <Reference Include="TIBCO.Rendezvous" Condition="'$(Platform)' != 'x64'">
+      <HintPath>lib\x86\TIBCO.Rendezvous.dll</HintPath>
+    </Reference>
+    <!-- 빌드 시 netmodule도 출력 폴더로 복사 -->
     <None Include="lib\x64\TIBCO.Rendezvous.netmodule" Condition="'$(Platform)' == 'x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="lib\x86\TIBCO.Rendezvous.netmodule" Condition="'$(Platform)' != 'x64'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Reference Include="Konscious.Security.Cryptography.Argon2">
@@ -136,10 +142,6 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="TIBCO.Rendezvous, Version=1.0.3818.29365, Culture=neutral, PublicKeyToken=1a696d1f90f6158a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\x64\TIBCO.Rendezvous.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Database\DatabaseHelper.cs" />
@@ -190,6 +192,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\UserManageForm.resx">
+      <DependentUpon>UserManageForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
